@@ -238,7 +238,7 @@ export default function SessionHistory() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => navigate(`/lecturer/attendance-management?sessionId=${session.id}`)}
+                          onClick={() => navigate(`/lecturer/attendance-management?session=${session.id}`)}
                         >
                           <Settings className="w-4 h-4 mr-1" />
                           Manage

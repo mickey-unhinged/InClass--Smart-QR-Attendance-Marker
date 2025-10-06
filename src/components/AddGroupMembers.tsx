@@ -38,9 +38,31 @@ export default function AddGroupMembers({ groupId, onMemberAdded }: AddGroupMemb
 
     setSearching(true);
     
+    // Get the class_id for this study group
+    const { data: groupData } = await supabase
+      .from('study_groups')
+      .select('class_id')
+      .eq('id', groupId)
+      .single();
+
+    if (!groupData) {
+      setSearching(false);
+      return;
+    }
+
+    // Get students enrolled in the same class
+    const { data: classmates } = await supabase
+      .from('student_enrollments')
+      .select('student_id')
+      .eq('class_id', groupData.class_id);
+
+    const classmateIds = classmates?.map(c => c.student_id) || [];
+
+    // Search only among classmates
     const { data, error } = await supabase
       .from('profiles')
       .select('id, email, full_name')
+      .in('id', classmateIds)
       .or(`email.ilike.%${query}%,full_name.ilike.%${query}%`)
       .limit(10);
 

@@ -44,6 +44,7 @@ export default function StudyGroups() {
   const fetchGroups = async () => {
     if (!user) return;
 
+    // Fetch all public groups (no filter to show both joined and not joined)
     const { data: groupsData } = await supabase
       .from('study_groups')
       .select('*')
@@ -235,6 +236,9 @@ export default function StudyGroups() {
       group.description?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const myGroups = filteredGroups.filter(g => g.is_member);
+  const discoverGroups = filteredGroups.filter(g => !g.is_member);
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-6xl mx-auto">
@@ -317,56 +321,95 @@ export default function StudyGroups() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredGroups.map((group) => (
-              <Card key={group.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{group.name}</CardTitle>
-                      <CardDescription className="mt-1">{group.description}</CardDescription>
-                    </div>
-                    <Users className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">
-                        {group.member_count}/{group.max_members} members
-                      </Badge>
-                      {group.is_public && <Badge>Public</Badge>}
-                      {group.is_creator && <Badge variant="default">Creator</Badge>}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {group.is_creator && (
-                        <AddGroupMembers 
-                          groupId={group.id} 
-                          onMemberAdded={fetchGroups}
-                        />
-                      )}
-                      {group.is_member && !group.is_creator ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => leaveGroup(group.id)}
-                        >
-                          Leave
-                        </Button>
-                      ) : !group.is_member && (
-                        <Button
-                          size="sm"
-                          onClick={() => joinGroup(group.id)}
-                          disabled={(group.member_count || 0) >= group.max_members}
-                        >
-                          Join
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-6">
+            {/* My Groups Section */}
+            {myGroups.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-3">My Groups</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {myGroups.map((group) => (
+                    <Card key={group.id}>
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{group.name}</CardTitle>
+                            <CardDescription className="mt-1">{group.description}</CardDescription>
+                          </div>
+                          <Users className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">
+                              {group.member_count}/{group.max_members} members
+                            </Badge>
+                            {group.is_public && <Badge>Public</Badge>}
+                            {group.is_creator && <Badge variant="default">Creator</Badge>}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {group.is_creator && (
+                              <AddGroupMembers 
+                                groupId={group.id} 
+                                onMemberAdded={fetchGroups}
+                              />
+                            )}
+                            {!group.is_creator && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => leaveGroup(group.id)}
+                              >
+                                Leave
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Discover Section */}
+            {discoverGroups.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-3">Discover Groups</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {discoverGroups.map((group) => (
+                    <Card key={group.id}>
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg">{group.name}</CardTitle>
+                            <CardDescription className="mt-1">{group.description}</CardDescription>
+                          </div>
+                          <Users className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">
+                              {group.member_count}/{group.max_members} members
+                            </Badge>
+                            {group.is_public && <Badge>Public</Badge>}
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => joinGroup(group.id)}
+                            disabled={(group.member_count || 0) >= group.max_members}
+                          >
+                            Join
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
