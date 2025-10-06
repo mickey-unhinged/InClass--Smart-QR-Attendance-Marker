@@ -14,6 +14,118 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendance_records: {
+        Row: {
+          device_info: Json | null
+          id: string
+          scanned_at: string | null
+          session_id: string
+          student_id: string
+        }
+        Insert: {
+          device_info?: Json | null
+          id?: string
+          scanned_at?: string | null
+          session_id: string
+          student_id: string
+        }
+        Update: {
+          device_info?: Json | null
+          id?: string
+          scanned_at?: string | null
+          session_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_sessions: {
+        Row: {
+          class_id: string
+          created_at: string | null
+          duration_minutes: number
+          end_time: string
+          id: string
+          is_active: boolean | null
+          lecturer_id: string
+          session_code: string
+          start_time: string | null
+        }
+        Insert: {
+          class_id: string
+          created_at?: string | null
+          duration_minutes: number
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          lecturer_id: string
+          session_code: string
+          start_time?: string | null
+        }
+        Update: {
+          class_id?: string
+          created_at?: string | null
+          duration_minutes?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          lecturer_id?: string
+          session_code?: string
+          start_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_sessions_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          academic_year: string
+          course_code: string
+          course_name: string
+          created_at: string | null
+          id: string
+          lecturer_id: string
+          section: string | null
+          semester: string
+          updated_at: string | null
+        }
+        Insert: {
+          academic_year: string
+          course_code: string
+          course_name: string
+          created_at?: string | null
+          id?: string
+          lecturer_id: string
+          section?: string | null
+          semester: string
+          updated_at?: string | null
+        }
+        Update: {
+          academic_year?: string
+          course_code?: string
+          course_name?: string
+          created_at?: string | null
+          id?: string
+          lecturer_id?: string
+          section?: string | null
+          semester?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -64,6 +176,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      deactivate_expired_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

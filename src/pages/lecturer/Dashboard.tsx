@@ -1,10 +1,12 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, QrCode, BarChart3, LogOut } from 'lucide-react';
+import { Users, QrCode, BarChart3, LogOut, BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function LecturerDashboard() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,6 +32,31 @@ export default function LecturerDashboard() {
             </p>
           </div>
 
+          {/* Quick Actions */}
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  onClick={() => navigate('/lecturer/classes')}
+                  size="lg" 
+                  className="h-16"
+                >
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  Manage Classes
+                </Button>
+                <Button 
+                  onClick={() => navigate('/lecturer/history')}
+                  size="lg" 
+                  variant="outline"
+                  className="h-16"
+                >
+                  <QrCode className="w-5 h-5 mr-2" />
+                  Session History
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid gap-6 md:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -38,7 +65,7 @@ export default function LecturerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">-</div>
-                <p className="text-xs text-muted-foreground">Coming in Phase 2</p>
+                <p className="text-xs text-muted-foreground">View in Classes page</p>
               </CardContent>
             </Card>
 
@@ -49,7 +76,7 @@ export default function LecturerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">-</div>
-                <p className="text-xs text-muted-foreground">Coming in Phase 2</p>
+                <p className="text-xs text-muted-foreground">Start a session</p>
               </CardContent>
             </Card>
 
@@ -67,22 +94,26 @@ export default function LecturerDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Getting Started</CardTitle>
+              <CardTitle>Phase 2 Complete: QR Code Core</CardTitle>
               <CardDescription>
-                Phase 1 Complete - Authentication & Roles are set up!
+                You can now generate QR codes and track attendance in real-time!
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <h3 className="font-medium">✅ Phase 1: Authentication & Roles</h3>
-                <p className="text-sm text-muted-foreground">
-                  You're logged in as a lecturer with role-based access.
-                </p>
+                <h3 className="font-medium">✅ What's Working Now:</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Create and manage classes</li>
+                  <li>• Generate time-limited QR codes</li>
+                  <li>• Real-time attendance tracking</li>
+                  <li>• Live student check-in feed</li>
+                  <li>• Session management with auto-expiry</li>
+                </ul>
               </div>
               <div className="space-y-2">
-                <h3 className="font-medium">⏳ Next: Phase 2 - QR Code Core</h3>
+                <h3 className="font-medium">⏳ Coming Next:</h3>
                 <p className="text-sm text-muted-foreground">
-                  Generate time-limited QR codes for attendance sessions.
+                  Phase 4 will add attendance history, reports, and analytics.
                 </p>
               </div>
             </CardContent>
