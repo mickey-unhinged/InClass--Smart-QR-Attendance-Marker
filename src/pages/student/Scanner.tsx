@@ -68,6 +68,9 @@ export default function Scanner() {
 
       // Generate device fingerprint for fraud prevention
       const deviceFingerprint = getDeviceFingerprint();
+      console.log('🔒 Device Fingerprint Generated:', deviceFingerprint);
+      console.log('🔒 Session ID:', session.id);
+      console.log('🔒 Student ID:', user.id);
 
       // SECURITY CHECK 1: Has this device already been used by another student in this session?
       const { data: deviceCheck } = await supabase
@@ -96,6 +99,8 @@ export default function Scanner() {
         .eq('student_id', user.id)
         .maybeSingle();
 
+      console.log('🔒 Student Check Result:', studentCheck);
+      
       if (studentCheck && studentCheck.device_fingerprint !== deviceFingerprint) {
         toast({
           title: 'Different Device Detected',
@@ -118,6 +123,7 @@ export default function Scanner() {
       }
 
       // Record attendance with device fingerprint
+      console.log('🔒 Recording attendance with fingerprint:', deviceFingerprint);
       const { error: recordError } = await supabase
         .from('attendance_records')
         .insert({
@@ -130,6 +136,8 @@ export default function Scanner() {
             fingerprint: deviceFingerprint,
           }
         });
+      
+      console.log('🔒 Record Error:', recordError);
 
       if (recordError) {
         if (recordError.code === '23505') { // Unique constraint violation
