@@ -83,7 +83,7 @@ const App = () => (
             />
             
             <Route 
-              path="/lecturer/history" 
+              path="/lecturer/session-history" 
               element={
                 <ProtectedRoute requiredRole="lecturer">
                   <SessionHistory />
@@ -123,7 +123,7 @@ const App = () => (
               } 
             />
             <Route 
-              path="/lecturer/manage-attendance" 
+              path="/lecturer/attendance-management" 
               element={
                 <ProtectedRoute requiredRole="lecturer">
                   <AttendanceManagement />
