@@ -26,6 +26,9 @@ import Badges from "./pages/student/Badges";
 import StudyGroups from "./pages/student/StudyGroups";
 import SessionTemplates from "./pages/lecturer/SessionTemplates";
 import AttendanceManagement from "./pages/lecturer/AttendanceManagement";
+import ClassAnnouncements from "./pages/lecturer/ClassAnnouncements";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminUserManagement from "./pages/admin/UserManagement";
 import NotFound from "./pages/NotFound";
 import OfflineIndicator from "./components/OfflineIndicator";
 
@@ -127,6 +130,14 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/lecturer/announcements" 
+              element={
+                <ProtectedRoute requiredRole="lecturer">
+                  <ClassAnnouncements />
+                </ProtectedRoute>
+              } 
+            />
             
             {/* Student Routes */}
             <Route 
@@ -182,6 +193,24 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="student">
                   <StudyGroups />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin Routes */}
+            <Route 
+              path="/admin/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/users" 
+              element={
+                <ProtectedRoute>
+                  <AdminUserManagement />
                 </ProtectedRoute>
               } 
             />

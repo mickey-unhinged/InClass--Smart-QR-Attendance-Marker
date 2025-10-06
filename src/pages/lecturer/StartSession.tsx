@@ -9,6 +9,9 @@ import { useToast } from '@/hooks/use-toast';
 import { generateSessionCode, generateQRCode } from '@/lib/qrcode';
 import { QrCode, Clock, Users, LogOut } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import LocationSelector from '@/components/LocationSelector';
+import GeofenceRadiusControl from '@/components/GeofenceRadiusControl';
 
 interface Class {
   id: string;
@@ -25,10 +28,40 @@ export default function StartSession() {
   const [classData, setClassData] = useState<Class | null>(null);
   const [duration, setDuration] = useState('10');
   const [loading, setLoading] = useState(true);
+  const [locationRequired, setLocationRequired] = useState(false);
+  const [latitude, setLatitude] = useState<number | undefined>();
+  const [longitude, setLongitude] = useState<number | undefined>();
+  const [geofenceRadius, setGeofenceRadius] = useState(100);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
 
   useEffect(() => {
     fetchClass();
+    fetchTemplates();
   }, [classId]);
+
+  const fetchTemplates = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('session_templates')
+      .select('*')
+      .eq('created_by', user.id)
+      .order('name');
+
+    if (data) {
+      setTemplates(data);
+    }
+  };
+
+  const applyTemplate = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setDuration(template.duration_minutes.toString());
+      setLocationRequired(template.location_required);
+      setGeofenceRadius(template.grace_period_minutes || 100);
+    }
+  };
 
   const fetchClass = async () => {
     if (!classId || !user) return;
@@ -72,6 +105,11 @@ export default function StartSession() {
           end_time: endTime.toISOString(),
           duration_minutes: durationMinutes,
           is_active: true,
+          location_required: locationRequired,
+          classroom_latitude: latitude,
+          classroom_longitude: longitude,
+          geofence_radius_meters: geofenceRadius,
+          template_id: selectedTemplate || null,
         })
         .select()
         .single();
@@ -130,6 +168,27 @@ export default function StartSession() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {templates.length > 0 && (
+              <div className="space-y-2">
+                <Label>Use Template (Optional)</Label>
+                <Select value={selectedTemplate} onValueChange={(value) => {
+                  setSelectedTemplate(value);
+                  applyTemplate(value);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map(template => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Session Duration</Label>
               <Select value={duration} onValueChange={setDuration}>
@@ -151,6 +210,38 @@ export default function StartSession() {
               <p className="text-sm text-muted-foreground">
                 Students will have this much time to scan the QR code
               </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Require Location Verification</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Students must be within the classroom to mark attendance
+                  </p>
+                </div>
+                <Switch
+                  checked={locationRequired}
+                  onCheckedChange={setLocationRequired}
+                />
+              </div>
+
+              {locationRequired && (
+                <>
+                  <LocationSelector
+                    onLocationSelect={(lat, lng) => {
+                      setLatitude(lat);
+                      setLongitude(lng);
+                    }}
+                    initialLatitude={latitude}
+                    initialLongitude={longitude}
+                  />
+                  <GeofenceRadiusControl
+                    radius={geofenceRadius}
+                    onRadiusChange={setGeofenceRadius}
+                  />
+                </>
+              )}
             </div>
 
             <div className="bg-muted/50 rounded-lg p-4 space-y-2">

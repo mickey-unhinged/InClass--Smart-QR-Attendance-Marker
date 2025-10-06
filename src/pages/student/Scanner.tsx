@@ -9,6 +9,9 @@ import { QRScanner } from '@/components/QRScanner';
 import { QrCode, CheckCircle2, LogOut, Camera } from 'lucide-react';
 import { validateSessionCode } from '@/lib/qrcode';
 import { getDeviceFingerprint, getStableDeviceFingerprint } from '@/lib/securityUtils';
+import { calculateDistance } from '@/lib/locationUtils';
+import { addPendingAttendance } from '@/lib/offlineStorage';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
 export default function Scanner() {
   const { user, signOut } = useAuth();
@@ -18,6 +21,7 @@ export default function Scanner() {
   const [scanning, setScanning] = useState(false);
   const [success, setSuccess] = useState(false);
   const [sessionInfo, setSessionInfo] = useState<any>(null);
+  const isOnline = useOnlineStatus();
 
   const handleScan = async (code: string) => {
     if (!user) return;
@@ -69,6 +73,75 @@ export default function Scanner() {
       // Generate device fingerprint for fraud prevention
       const deviceFingerprint = await getStableDeviceFingerprint();
 
+      // Handle location verification if required
+      let locationData: any = {};
+      if (session.location_required && session.classroom_latitude && session.classroom_longitude) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+
+          const studentLat = position.coords.latitude;
+          const studentLng = position.coords.longitude;
+          const distance = calculateDistance(
+            { latitude: studentLat, longitude: studentLng },
+            { 
+              latitude: session.classroom_latitude, 
+              longitude: session.classroom_longitude 
+            }
+          );
+
+          if (distance > session.geofence_radius_meters) {
+            toast({
+              title: 'Location Verification Failed',
+              description: `You must be within ${session.geofence_radius_meters}m of the classroom. You are ${Math.round(distance)}m away.`,
+              variant: 'destructive',
+            });
+            setScanning(false);
+            return;
+          }
+
+          locationData = {
+            student_latitude: studentLat,
+            student_longitude: studentLng,
+            distance_from_classroom: distance,
+            location_verified: true,
+          };
+        } catch (error) {
+          toast({
+            title: 'Location Access Required',
+            description: 'Please enable location services to mark attendance',
+            variant: 'destructive',
+          });
+          setScanning(false);
+          return;
+        }
+      }
+
+      // Handle offline mode
+      if (!isOnline) {
+        await addPendingAttendance({
+          sessionId: session.id,
+          studentId: user.id,
+          timestamp: new Date().toISOString(),
+          deviceFingerprint,
+          location: locationData.student_latitude ? {
+            latitude: locationData.student_latitude,
+            longitude: locationData.student_longitude,
+          } : undefined,
+        });
+
+        toast({
+          title: 'Attendance Queued',
+          description: 'You are offline. Attendance will be synced when connection is restored.',
+        });
+
+        setSuccess(true);
+        setSessionInfo(session);
+        setScanning(false);
+        return;
+      }
+
       // Record attendance - database enforces one device per session via unique constraint
       const { error: recordError } = await supabase
         .from('attendance_records')
@@ -76,6 +149,7 @@ export default function Scanner() {
           session_id: session.id,
           student_id: user.id,
           device_fingerprint: deviceFingerprint,
+          ...locationData,
           device_info: {
             userAgent: navigator.userAgent,
             timestamp: new Date().toISOString(),
