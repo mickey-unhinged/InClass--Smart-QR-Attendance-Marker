@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, BookOpen, Users, LogOut } from 'lucide-react';
+import { Plus, BookOpen, Users, LogOut, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -24,6 +24,7 @@ interface Class {
   section: string | null;
   semester: string;
   academic_year: string;
+  enrollment_count?: number;
 }
 
 export default function LecturerClasses() {
@@ -48,7 +49,7 @@ export default function LecturerClasses() {
 
   const fetchClasses = async () => {
     if (!user) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('classes')
@@ -57,7 +58,24 @@ export default function LecturerClasses() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setClasses(data || []);
+      
+      // Fetch enrollment counts for each class
+      if (data) {
+        const classesWithCounts = await Promise.all(
+          data.map(async (cls) => {
+            const { count } = await supabase
+              .from('student_enrollments')
+              .select('*', { count: 'exact', head: true })
+              .eq('class_id', cls.id);
+            
+            return {
+              ...cls,
+              enrollment_count: count || 0
+            };
+          })
+        );
+        setClasses(classesWithCounts);
+      }
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -96,6 +114,34 @@ export default function LecturerClasses() {
         academic_year: new Date().getFullYear().toString(),
       });
       setOpen(false);
+      fetchClasses();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteClass = async (classId: string, className: string) => {
+    if (!confirm(`Are you sure you want to delete "${className}"? This will also delete all related sessions and attendance records.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('classes')
+        .delete()
+        .eq('id', classId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Class deleted successfully',
+      });
+
       fetchClasses();
     } catch (error: any) {
       toast({
@@ -214,27 +260,50 @@ export default function LecturerClasses() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {classes.map((cls) => (
-              <Card key={cls.id} className="hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => navigate(`/lecturer/session/${cls.id}`)}>
+              <Card key={cls.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    {cls.course_code}
-                  </CardTitle>
-                  <CardDescription>{cls.course_name}</CardDescription>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        {cls.course_code}
+                      </CardTitle>
+                      <CardDescription>{cls.course_name}</CardDescription>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClass(cls.id, cls.course_name);
+                      }}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2 text-sm">
-                    {cls.section && (
-                      <p className="text-muted-foreground">Section: {cls.section}</p>
-                    )}
-                    <p className="text-muted-foreground">Semester: {cls.semester}</p>
-                    <p className="text-muted-foreground">Year: {cls.academic_year}</p>
+                  <div className="space-y-3">
+                    <div className="space-y-1 text-sm">
+                      {cls.section && (
+                        <p className="text-muted-foreground">Section: {cls.section}</p>
+                      )}
+                      <p className="text-muted-foreground">Semester: {cls.semester}</p>
+                      <p className="text-muted-foreground">Year: {cls.academic_year}</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm bg-primary/10 text-primary px-3 py-2 rounded-md">
+                      <Users className="h-4 w-4" />
+                      <span className="font-medium">{cls.enrollment_count || 0} students enrolled</span>
+                    </div>
+                    <Button 
+                      onClick={() => navigate(`/lecturer/start-session/${cls.id}`)}
+                      className="w-full" 
+                      size="sm"
+                    >
+                      Start Session
+                    </Button>
                   </div>
-                  <Button className="w-full mt-4" size="sm">
-                    <Users className="w-4 h-4 mr-2" />
-                    Start Session
-                  </Button>
                 </CardContent>
               </Card>
             ))}

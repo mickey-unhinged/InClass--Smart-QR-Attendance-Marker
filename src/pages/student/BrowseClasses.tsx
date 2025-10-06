@@ -88,8 +88,8 @@ export default function BrowseClasses() {
           const profile = profilesMap.get(c.lecturer_id);
           return {
             ...c,
-            lecturer_name: profile?.full_name || null,
-            lecturer_email: profile?.email || 'Unknown',
+            lecturer_name: profile?.full_name || profile?.email || 'Unknown Lecturer',
+            lecturer_email: profile?.email || '',
             is_enrolled: enrolledClassIds.has(c.id),
           };
         }) || [];

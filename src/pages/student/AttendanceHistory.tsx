@@ -59,15 +59,20 @@ export default function AttendanceHistory() {
       if (data) {
         const enrichedData = await Promise.all(
           data.map(async (record) => {
-            const { data: session } = await supabase
+            const { data: session, error: sessionError } = await supabase
               .from('attendance_sessions')
               .select('classes(course_code, course_name)')
               .eq('id', record.session_id)
-              .single();
+              .maybeSingle();
             
             return {
               ...record,
-              attendance_sessions: session || { classes: { course_code: 'N/A', course_name: 'Unknown' } }
+              attendance_sessions: session || { 
+                classes: { 
+                  course_code: sessionError ? 'N/A' : 'Unknown', 
+                  course_name: sessionError ? 'Class Not Found' : 'Unknown Class' 
+                } 
+              }
             };
           })
         );

@@ -140,8 +140,12 @@ export default function StartSession() {
                   <SelectItem value="5">5 minutes</SelectItem>
                   <SelectItem value="10">10 minutes</SelectItem>
                   <SelectItem value="15">15 minutes</SelectItem>
-                  <SelectItem value="20">20 minutes</SelectItem>
                   <SelectItem value="30">30 minutes</SelectItem>
+                  <SelectItem value="45">45 minutes</SelectItem>
+                  <SelectItem value="60">1 hour</SelectItem>
+                  <SelectItem value="90">1.5 hours</SelectItem>
+                  <SelectItem value="120">2 hours</SelectItem>
+                  <SelectItem value="180">3 hours</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
