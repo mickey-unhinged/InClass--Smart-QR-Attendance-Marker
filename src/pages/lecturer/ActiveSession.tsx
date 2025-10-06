@@ -242,11 +242,16 @@ export default function ActiveSession() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Active Session</h1>
-            <p className="text-sm text-muted-foreground">
-              {session?.classes.course_code} - {session?.classes.course_name}
-            </p>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" onClick={() => navigate('/lecturer/dashboard')}>
+              ← Dashboard
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Active Session</h1>
+              <p className="text-sm text-muted-foreground">
+                {session?.classes.course_code} - {session?.classes.course_name}
+              </p>
+            </div>
           </div>
           <Button onClick={signOut} variant="outline" size="sm">
             <LogOut className="w-4 h-4 mr-2" />

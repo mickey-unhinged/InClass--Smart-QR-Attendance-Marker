@@ -297,7 +297,7 @@ export default function LecturerClasses() {
                       <span className="font-medium">{cls.enrollment_count || 0} students enrolled</span>
                     </div>
                     <Button 
-                      onClick={() => navigate(`/lecturer/start-session/${cls.id}`)}
+                      onClick={() => navigate(`/lecturer/session/${cls.id}`)}
                       className="w-full" 
                       size="sm"
                     >

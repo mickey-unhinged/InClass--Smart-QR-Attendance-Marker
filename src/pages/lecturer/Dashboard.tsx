@@ -24,6 +24,7 @@ export default function LecturerDashboard() {
     activeSessions: 0,
     avgAttendance: 0,
     recentSessions: [] as any[],
+    activeSessionsList: [] as any[],
   });
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState<string>('');
@@ -81,6 +82,14 @@ export default function LecturerDashboard() {
         .eq('lecturer_id', user.id)
         .eq('is_active', true);
 
+      // Get active sessions list with details
+      const { data: activeSessionsList } = await supabase
+        .from('attendance_sessions')
+        .select('id, end_time, classes(course_code, course_name)')
+        .eq('lecturer_id', user.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
       // Get recent sessions (last 5)
       const { data: recentSessions } = await supabase
         .from('attendance_sessions')
@@ -126,6 +135,7 @@ export default function LecturerDashboard() {
         activeSessions: activeSessions || 0,
         avgAttendance,
         recentSessions: recentSessions || [],
+        activeSessionsList: activeSessionsList || [],
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -247,6 +257,45 @@ export default function LecturerDashboard() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Active Sessions Widget */}
+          {stats.activeSessionsList.length > 0 && (
+            <Card className="border-primary/50 bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-primary animate-pulse" />
+                  Active Sessions
+                </CardTitle>
+                <CardDescription>Sessions currently running - you can resume at any time</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {stats.activeSessionsList.map((session: any) => (
+                    <div
+                      key={session.id}
+                      className="flex items-center justify-between p-3 bg-card rounded-lg hover:bg-muted/50 transition-colors border border-primary/20"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">
+                          {session.classes?.course_code} - {session.classes?.course_name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Ends at {new Date(session.end_time).toLocaleTimeString()}
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => navigate(`/lecturer/active-session/${session.id}`)}
+                        size="sm"
+                        className="ml-2"
+                      >
+                        Resume Session
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Recent Sessions Widget */}
           {stats.recentSessions.length > 0 && (
