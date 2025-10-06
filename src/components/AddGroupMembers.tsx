@@ -66,7 +66,19 @@ export default function AddGroupMembers({ groupId, onMemberAdded }: AddGroupMemb
       .or(`email.ilike.%${query}%,full_name.ilike.%${query}%`)
       .limit(10);
 
-    if (!error && data) {
+    if (error) {
+      console.error('Student search error:', error);
+      toast({
+        title: 'Error',
+        description: `Search failed: ${error.code || ''} ${error.message}`,
+        variant: 'destructive',
+      });
+      setStudents([]);
+      setSearching(false);
+      return;
+    }
+
+    if (data) {
       // Filter out users who are already members
       const { data: existingMembers } = await supabase
         .from('study_group_members')
@@ -120,7 +132,7 @@ export default function AddGroupMembers({ groupId, onMemberAdded }: AddGroupMemb
     if (error) {
       toast({
         title: 'Error',
-        description: `Failed to add member: ${error.message}`,
+        description: `Failed to add member: ${error.code || ''} ${error.message}`,
         variant: 'destructive',
       });
     } else {

@@ -245,6 +245,19 @@ export default function Scanner() {
         return;
       }
 
+      // Update attendance insights asynchronously (non-blocking)
+      try {
+        await supabase.functions.invoke('update-attendance-patterns', {
+          body: {
+            studentId: user.id,
+            classId: session.class_id,
+            sessionId: session.id,
+          },
+        });
+      } catch (fnErr: any) {
+        console.warn('update-attendance-patterns failed:', fnErr?.message || fnErr);
+      }
+
       // Success!
       setSessionInfo(session);
       setSuccess(true);

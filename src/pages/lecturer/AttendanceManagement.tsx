@@ -42,19 +42,50 @@ export default function AttendanceManagement() {
   const fetchAttendees = async () => {
     if (!sessionId) return;
 
-    const { data, error } = await supabase
+    // Step 1: fetch records
+    const { data: records, error: recordsError } = await supabase
       .from('attendance_records')
-      .select('*, profiles(full_name, email)')
+      .select('id, student_id, scanned_at')
       .eq('session_id', sessionId)
       .order('scanned_at', { ascending: false });
 
-    if (!error && data) {
-      setAttendees(data.map(record => ({
-        ...record,
-        full_name: (record.profiles as any)?.full_name,
-        email: (record.profiles as any)?.email,
-      })));
+    if (recordsError) {
+      console.error('Fetch attendance records error:', recordsError);
+      toast({
+        title: 'Error',
+        description: `Failed to load attendees: ${recordsError.code || ''} ${recordsError.message}`,
+        variant: 'destructive',
+      });
+      setLoading(false);
+      return;
     }
+
+    // Step 2: fetch profiles for unique student IDs
+    const studentIds = Array.from(new Set((records || []).map(r => r.student_id)));
+    let profilesMap: Record<string, { full_name?: string; email?: string }> = {};
+    if (studentIds.length > 0) {
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', studentIds);
+
+      if (profilesError) {
+        console.warn('Fetch profiles warning:', profilesError);
+      } else if (profilesData) {
+        profilesMap = profilesData.reduce((acc: any, p: any) => {
+          acc[p.id] = { full_name: p.full_name, email: p.email };
+          return acc;
+        }, {});
+      }
+    }
+
+    setAttendees((records || []).map((r) => ({
+      id: r.id,
+      student_id: r.student_id,
+      scanned_at: r.scanned_at as string,
+      full_name: profilesMap[r.student_id]?.full_name,
+      email: profilesMap[r.student_id]?.email,
+    })));
     setLoading(false);
   };
 
@@ -121,9 +152,12 @@ export default function AttendanceManagement() {
         });
       }
     } else {
+      const duplicate = recordError.code === '23505';
       toast({
         title: 'Error',
-        description: `Failed to add attendance: ${recordError.message}`,
+        description: duplicate
+          ? 'Student is already marked present for this session'
+          : `Failed to add attendance: ${recordError.code || ''} ${recordError.message}`,
         variant: 'destructive',
       });
     }
@@ -160,7 +194,7 @@ export default function AttendanceManagement() {
     } else {
       toast({
         title: 'Error',
-        description: 'Failed to remove attendance',
+        description: `Failed to remove attendance: ${deleteError.code || ''} ${deleteError.message}`,
         variant: 'destructive',
       });
     }

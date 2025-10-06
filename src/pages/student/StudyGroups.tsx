@@ -44,11 +44,11 @@ export default function StudyGroups() {
   const fetchGroups = async () => {
     if (!user) return;
 
-    // Fetch all public groups (no filter to show both joined and not joined)
-    const { data: groupsData } = await supabase
+    // Fetch groups visible to the user (public, created_by user, or member of)
+    const { data: groupsData, error: groupsError } = await supabase
       .from('study_groups')
       .select('*')
-      .eq('is_public', true);
+      .order('created_at', { ascending: false });
 
     const { data: memberData } = await supabase
       .from('study_group_members')
@@ -132,7 +132,8 @@ export default function StudyGroups() {
       return;
     }
 
-    const { data, error } = await supabase
+    // Create the group (returning id if allowed)
+    const { data: inserted, error: insertError } = await supabase
       .from('study_groups')
       .insert({
         class_id: enrollments[0].class_id,
@@ -142,44 +143,65 @@ export default function StudyGroups() {
         created_by: user.id,
         is_public: true,
       })
-      .select()
-      .single();
+      .select('id')
+      .maybeSingle();
 
-    if (error) {
-      console.error('Study group creation error:', error);
+    if (insertError) {
+      console.error('Study group creation error:', insertError);
       toast({
         title: 'Error',
-        description: `Failed to create study group: ${error.message}`,
+        description: `Failed to create study group: ${insertError.code || ''} ${insertError.message}`,
         variant: 'destructive',
       });
       return;
     }
 
-    if (data) {
-      const { error: memberError } = await supabase.from('study_group_members').insert({
-        group_id: data.id,
-        student_id: user.id,
-        role: 'creator',
-      });
+    let groupId = inserted?.id as string | undefined;
 
-      if (memberError) {
-        console.error('Member add error:', memberError);
+    if (!groupId) {
+      // Fallback: fetch the most recent group created by this user
+      const { data: latest, error: latestError } = await supabase
+        .from('study_groups')
+        .select('id')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (latestError || !latest) {
         toast({
-          title: 'Warning',
-          description: 'Group created but failed to add you as member',
+          title: 'Error',
+          description: `Group created but could not retrieve ID: ${latestError?.code || ''} ${latestError?.message || ''}`,
           variant: 'destructive',
         });
-      } else {
-        toast({
-          title: 'Success',
-          description: 'Study group created successfully',
-        });
+        return;
       }
-
-      setCreateDialogOpen(false);
-      setNewGroup({ name: '', description: '', maxMembers: 6 });
-      fetchGroups();
+      groupId = latest.id;
     }
+
+    const { error: memberError } = await supabase.from('study_group_members').insert({
+      group_id: groupId,
+      student_id: user.id,
+      role: 'creator',
+    });
+
+    if (memberError) {
+      console.error('Member add error:', memberError);
+      toast({
+        title: 'Warning',
+        description: `Group created but failed to add you as member: ${memberError.code || ''} ${memberError.message}`,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Success',
+        description: 'Study group created successfully',
+      });
+    }
+
+    setCreateDialogOpen(false);
+    setNewGroup({ name: '', description: '', maxMembers: 6 });
+    fetchGroups();
   };
 
   const joinGroup = async (groupId: string) => {
@@ -194,7 +216,7 @@ export default function StudyGroups() {
     if (error) {
       toast({
         title: 'Error',
-        description: 'Failed to join group',
+        description: `Failed to join group: ${error.code || ''} ${error.message}`,
         variant: 'destructive',
       });
     } else {
@@ -218,7 +240,7 @@ export default function StudyGroups() {
     if (error) {
       toast({
         title: 'Error',
-        description: 'Failed to leave group',
+        description: `Failed to leave group: ${error.code || ''} ${error.message}`,
         variant: 'destructive',
       });
     } else {
