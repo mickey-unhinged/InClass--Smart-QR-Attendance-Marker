@@ -2,9 +2,17 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, History, FileText, BarChart3, LogOut, Users, TrendingUp, AlertCircle, Plus } from 'lucide-react';
+import { BookOpen, History, FileText, BarChart3, LogOut, Users, TrendingUp, AlertCircle, Plus, GraduationCap, Menu, QrCode, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function LecturerDashboard() {
   const { user, signOut } = useAuth();
@@ -113,14 +121,51 @@ export default function LecturerDashboard() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">InClass Lecturer</h1>
-            <p className="text-sm text-muted-foreground">Welcome back!</p>
+          <div className="flex items-center gap-3">
+            <GraduationCap className="w-8 h-8 text-primary" />
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">InClass Lecturer</h1>
+              <p className="text-sm text-muted-foreground">Welcome back!</p>
+            </div>
           </div>
-          <Button onClick={signOut} variant="outline" size="sm">
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Menu className="w-4 h-4 mr-2" />
+                Menu
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/lecturer/start-session')}>
+                <QrCode className="w-4 h-4 mr-2" />
+                Start Session
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/classes')}>
+                <BookOpen className="w-4 h-4 mr-2" />
+                Manage Classes
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/session-history')}>
+                <History className="w-4 h-4 mr-2" />
+                Session History
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/reports')}>
+                <FileText className="w-4 h-4 mr-2" />
+                Reports
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/analytics')}>
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analytics
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={signOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

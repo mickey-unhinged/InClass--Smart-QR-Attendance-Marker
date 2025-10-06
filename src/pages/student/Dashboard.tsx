@@ -2,11 +2,19 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, QrCode, History, Settings, LogOut, TrendingUp, Calendar, Award } from 'lucide-react';
+import { BookOpen, QrCode, History, Settings, LogOut, TrendingUp, Calendar, Award, GraduationCap, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import BrowseClasses from './BrowseClasses';
 import SessionNotifications from '@/components/SessionNotifications';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function StudentDashboard() {
   const { user, signOut } = useAuth();
@@ -142,11 +150,40 @@ export default function StudentDashboard() {
       <SessionNotifications />
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">InClass Student</h1>
-          <Button onClick={signOut} variant="outline" size="sm">
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-3">
+            <GraduationCap className="w-8 h-8 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">InClass Student</h1>
+          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Menu className="w-4 h-4 mr-2" />
+                Menu
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/student/scanner')}>
+                <QrCode className="w-4 h-4 mr-2" />
+                Scan QR Code
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/student/attendance')}>
+                <History className="w-4 h-4 mr-2" />
+                View History
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/student/settings')}>
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={signOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

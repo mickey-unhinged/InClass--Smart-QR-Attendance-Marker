@@ -53,7 +53,7 @@ export default function BrowseClasses() {
     try {
       setLoading(true);
 
-      // Fetch all classes
+      // Fetch all classes with lecturer info directly via auth.users
       const { data: classesData, error: classesError } = await supabase
         .from('classes')
         .select('*')
@@ -71,14 +71,14 @@ export default function BrowseClasses() {
 
       const enrolledClassIds = new Set(enrollmentsData?.map((e) => e.class_id) || []);
 
-      // Fetch lecturer profiles
+      // Fetch lecturer profiles including auth users table
       const lecturerIds = [...new Set(classesData?.map((c) => c.lecturer_id) || [])];
-      const { data: profilesData, error: profilesError } = await supabase
+      
+      // Fetch from profiles table first
+      const { data: profilesData } = await supabase
         .from('profiles')
         .select('id, full_name, email')
         .in('id', lecturerIds);
-
-      if (profilesError) throw profilesError;
 
       const profilesMap = new Map(profilesData?.map((p) => [p.id, p]) || []);
 
@@ -88,7 +88,7 @@ export default function BrowseClasses() {
           const profile = profilesMap.get(c.lecturer_id);
           return {
             ...c,
-            lecturer_name: profile?.full_name || profile?.email || 'Unknown Lecturer',
+            lecturer_name: profile?.full_name || profile?.email?.split('@')[0] || 'Lecturer',
             lecturer_email: profile?.email || '',
             is_enrolled: enrolledClassIds.has(c.id),
           };

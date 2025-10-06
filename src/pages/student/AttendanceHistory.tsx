@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Calendar, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { LogOut, Calendar, TrendingUp, CheckCircle2, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
@@ -59,18 +59,36 @@ export default function AttendanceHistory() {
       if (data) {
         const enrichedData = await Promise.all(
           data.map(async (record) => {
-            const { data: session, error: sessionError } = await supabase
+            const { data: session } = await supabase
               .from('attendance_sessions')
-              .select('classes(course_code, course_name)')
+              .select('class_id')
               .eq('id', record.session_id)
               .maybeSingle();
             
+            if (session?.class_id) {
+              const { data: classData } = await supabase
+                .from('classes')
+                .select('course_code, course_name')
+                .eq('id', session.class_id)
+                .maybeSingle();
+              
+              return {
+                ...record,
+                attendance_sessions: {
+                  classes: classData || { 
+                    course_code: 'N/A', 
+                    course_name: 'Class Information Unavailable' 
+                  }
+                }
+              };
+            }
+            
             return {
               ...record,
-              attendance_sessions: session || { 
+              attendance_sessions: { 
                 classes: { 
-                  course_code: sessionError ? 'N/A' : 'Unknown', 
-                  course_name: sessionError ? 'Class Not Found' : 'Unknown Class' 
+                  course_code: 'N/A', 
+                  course_name: 'Class Information Unavailable' 
                 } 
               }
             };
@@ -127,10 +145,11 @@ export default function AttendanceHistory() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Button variant="ghost" onClick={() => navigate('/student/dashboard')}>
               ← Dashboard
             </Button>
+            <GraduationCap className="w-6 h-6 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Attendance History</h1>
           </div>
           <Button onClick={signOut} variant="outline" size="sm">
