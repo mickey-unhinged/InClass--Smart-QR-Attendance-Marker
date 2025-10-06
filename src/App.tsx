@@ -16,6 +16,7 @@ import LecturerReports from "./pages/lecturer/Reports";
 import StudentDashboard from "./pages/student/Dashboard";
 import Scanner from "./pages/student/Scanner";
 import AttendanceHistory from "./pages/student/AttendanceHistory";
+import StudentSettings from "./pages/student/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -104,6 +105,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="student">
                   <AttendanceHistory />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student/settings" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudentSettings />
                 </ProtectedRoute>
               } 
             />

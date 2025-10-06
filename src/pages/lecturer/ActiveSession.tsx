@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { generateQRCode } from '@/lib/qrcode';
-import { X, Users, Clock, CheckCircle2, LogOut } from 'lucide-react';
+import { preventScreenshot } from '@/lib/securityUtils';
+import { requestNotificationPermission, notifySessionActive } from '@/lib/notifications';
+import { X, Users, Clock, CheckCircle2, LogOut, Shield } from 'lucide-react';
 
 interface Session {
   id: string;
@@ -43,6 +45,18 @@ export default function ActiveSession() {
 
   useEffect(() => {
     fetchSession();
+    
+    // Request notification permission
+    requestNotificationPermission();
+    
+    // Enable screenshot prevention
+    preventScreenshot(() => {
+      toast({
+        title: 'Security Alert',
+        description: 'Screenshot detection activated',
+        variant: 'destructive',
+      });
+    });
   }, [sessionId]);
 
   useEffect(() => {
@@ -106,6 +120,12 @@ export default function ActiveSession() {
       // Generate QR code
       const qr = await generateQRCode(data.session_code);
       setQrCode(qr);
+      
+      // Send browser notification
+      notifySessionActive(
+        `${data.classes.course_code} - ${data.classes.course_name}`,
+        data.duration_minutes
+      );
       
       await fetchAttendees();
     } catch (error: any) {
@@ -231,7 +251,7 @@ export default function ActiveSession() {
               </div>
               
               <div className="space-y-4">
-                <div className="bg-muted/50 rounded-lg p-4 flex items-center justify-between">
+                <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-4 flex items-center justify-between border border-primary/20">
                   <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5 text-primary" />
                     <span className="font-medium">Time Remaining</span>
@@ -239,12 +259,20 @@ export default function ActiveSession() {
                   <span className="text-2xl font-bold text-primary">{formatTime(timeLeft)}</span>
                 </div>
                 
-                <div className="bg-muted/50 rounded-lg p-4 flex items-center justify-between">
+                <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/5 rounded-lg p-4 flex items-center justify-between border border-green-500/20">
                   <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-primary" />
+                    <Users className="w-5 h-5 text-green-600" />
                     <span className="font-medium">Attendees</span>
                   </div>
-                  <span className="text-2xl font-bold text-primary">{attendees.length}</span>
+                  <span className="text-2xl font-bold text-green-600">{attendees.length}</span>
+                </div>
+                
+                <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/5 rounded-lg p-4 flex items-center gap-2 border border-orange-500/20">
+                  <Shield className="w-5 h-5 text-orange-600" />
+                  <div className="text-sm">
+                    <p className="font-medium text-orange-900 dark:text-orange-100">Security Active</p>
+                    <p className="text-xs text-orange-700 dark:text-orange-300">Screenshot & fraud prevention enabled</p>
+                  </div>
                 </div>
               </div>
 

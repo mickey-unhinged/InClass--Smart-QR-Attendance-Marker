@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, QrCode, TrendingUp, LogOut } from 'lucide-react';
+import { Calendar, QrCode, TrendingUp, LogOut, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function StudentDashboard() {
@@ -53,6 +53,24 @@ export default function StudentDashboard() {
                   <Calendar className="w-5 h-5 mr-2" />
                   View History
                 </Button>
+                <Button 
+                  onClick={() => navigate('/student/settings')}
+                  size="lg" 
+                  variant="outline"
+                  className="h-16"
+                >
+                  <Settings className="w-5 h-5 mr-2" />
+                  Settings
+                </Button>
+                <Button 
+                  onClick={signOut}
+                  size="lg" 
+                  variant="outline"
+                  className="h-16"
+                >
+                  <LogOut className="w-5 h-5 mr-2" />
+                  Sign Out
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -94,26 +112,23 @@ export default function StudentDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Phase 2 Complete: QR Code Core</CardTitle>
+              <CardTitle>🎉 Phases 1-7 Complete!</CardTitle>
               <CardDescription>
-                You can now scan QR codes to mark attendance!
+                Full attendance system with security & notifications
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <h3 className="font-medium">✅ What's Working Now:</h3>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Scan QR codes to mark attendance</li>
+                  <li>• Scan QR codes with security measures</li>
                   <li>• Real-time attendance confirmation</li>
-                  <li>• Duplicate scan prevention</li>
-                  <li>• Session validation & expiry</li>
+                  <li>• Attendance history with charts</li>
+                  <li>• Browser notifications for sessions</li>
+                  <li>• Location verification (optional)</li>
+                  <li>• Screenshot & fraud prevention</li>
+                  <li>• PDF & CSV report exports</li>
                 </ul>
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-medium">⏳ Coming Next:</h3>
-                <p className="text-sm text-muted-foreground">
-                  Phase 4 will add attendance history, percentages, and detailed reports.
-                </p>
               </div>
             </CardContent>
           </Card>
