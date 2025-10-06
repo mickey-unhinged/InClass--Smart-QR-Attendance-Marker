@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,88 +29,38 @@ export default function LecturerDashboard() {
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState<string>('');
 
+  // Timeout fallback to prevent infinite loading
   useEffect(() => {
-    if (user) {
-      fetchDashboardStats();
-      fetchUserName();
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Dashboard loading timeout - forcing loading state to false');
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
+  const fetchUserName = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('full_name, email')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      setUserName(
+        data?.full_name || 
+        data?.email?.split('@')[0] || 
+        'Lecturer'
+      );
+    } catch (error) {
+      console.error('Error fetching user name:', error);
     }
   }, [user]);
 
-  // Real-time subscriptions for live updates
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('dashboard-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'classes',
-          filter: `lecturer_id=eq.${user.id}`,
-        },
-        () => {
-          fetchDashboardStats();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'attendance_sessions',
-          filter: `lecturer_id=eq.${user.id}`,
-        },
-        () => {
-          fetchDashboardStats();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'student_enrollments',
-        },
-        () => {
-          fetchDashboardStats();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'attendance_records',
-        },
-        () => {
-          fetchDashboardStats();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
-  const fetchUserName = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from('profiles')
-      .select('full_name, email')
-      .eq('id', user.id)
-      .maybeSingle();
-    
-    setUserName(
-      data?.full_name || 
-      data?.email?.split('@')[0] || 
-      'Lecturer'
-    );
-  };
-
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -198,10 +148,79 @@ export default function LecturerDashboard() {
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
+      // Set partial stats even on error to prevent blank dashboard
+      setStats(prev => ({ ...prev }));
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  // Initial data fetch
+  useEffect(() => {
+    if (user) {
+      fetchDashboardStats();
+      fetchUserName();
+    }
+  }, [user, fetchDashboardStats, fetchUserName]);
+
+  // Real-time subscriptions for live updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('dashboard-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'classes',
+          filter: `lecturer_id=eq.${user.id}`,
+        },
+        () => {
+          fetchDashboardStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'attendance_sessions',
+          filter: `lecturer_id=eq.${user.id}`,
+        },
+        () => {
+          fetchDashboardStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'student_enrollments',
+        },
+        () => {
+          fetchDashboardStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'attendance_records',
+        },
+        () => {
+          fetchDashboardStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchDashboardStats]);
 
   return (
     <div className="min-h-screen bg-background">
