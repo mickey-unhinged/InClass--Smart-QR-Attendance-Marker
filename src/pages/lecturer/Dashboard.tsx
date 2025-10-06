@@ -244,7 +244,7 @@ export default function LecturerDashboard() {
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/lecturer/session')}>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/classes')}>
                 <QrCode className="w-4 h-4 mr-2" />
                 Start Session
               </DropdownMenuItem>
