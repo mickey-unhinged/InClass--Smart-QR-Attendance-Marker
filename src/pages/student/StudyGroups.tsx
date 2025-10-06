@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import AddGroupMembers from '@/components/AddGroupMembers';
 
 interface StudyGroup {
   id: string;
@@ -18,8 +19,10 @@ interface StudyGroup {
   description: string;
   max_members: number;
   is_public: boolean;
+  created_by: string;
   member_count?: number;
   is_member?: boolean;
+  is_creator?: boolean;
 }
 
 export default function StudyGroups() {
@@ -65,6 +68,7 @@ export default function StudyGroups() {
             ...group,
             member_count: count || 0,
             is_member: memberGroupIds.includes(group.id),
+            is_creator: group.created_by === user?.id,
           };
         })
       );
@@ -84,12 +88,39 @@ export default function StudyGroups() {
       return;
     }
 
+    // Check if user has student role
+    const { data: userRole, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'student')
+      .maybeSingle();
+
+    if (roleError || !userRole) {
+      toast({
+        title: 'Error',
+        description: 'You need student role to create study groups. Contact admin.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Get first enrolled class or show error
-    const { data: enrollments } = await supabase
+    const { data: enrollments, error: enrollError } = await supabase
       .from('student_enrollments')
       .select('class_id')
       .eq('student_id', user.id)
       .limit(1);
+
+    if (enrollError) {
+      console.error('Enrollment check error:', enrollError);
+      toast({
+        title: 'Error',
+        description: 'Failed to check enrollments. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     if (!enrollments || enrollments.length === 0) {
       toast({
@@ -114,22 +145,35 @@ export default function StudyGroups() {
       .single();
 
     if (error) {
+      console.error('Study group creation error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create study group',
+        description: `Failed to create study group: ${error.message}`,
         variant: 'destructive',
       });
-    } else if (data) {
-      await supabase.from('study_group_members').insert({
+      return;
+    }
+
+    if (data) {
+      const { error: memberError } = await supabase.from('study_group_members').insert({
         group_id: data.id,
         student_id: user.id,
         role: 'creator',
       });
 
-      toast({
-        title: 'Success',
-        description: 'Study group created successfully',
-      });
+      if (memberError) {
+        console.error('Member add error:', memberError);
+        toast({
+          title: 'Warning',
+          description: 'Group created but failed to add you as member',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Success',
+          description: 'Study group created successfully',
+        });
+      }
 
       setCreateDialogOpen(false);
       setNewGroup({ name: '', description: '', maxMembers: 6 });
@@ -292,24 +336,33 @@ export default function StudyGroups() {
                         {group.member_count}/{group.max_members} members
                       </Badge>
                       {group.is_public && <Badge>Public</Badge>}
+                      {group.is_creator && <Badge variant="default">Creator</Badge>}
                     </div>
-                    {group.is_member ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => leaveGroup(group.id)}
-                      >
-                        Leave
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={() => joinGroup(group.id)}
-                        disabled={(group.member_count || 0) >= group.max_members}
-                      >
-                        Join
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {group.is_creator && (
+                        <AddGroupMembers 
+                          groupId={group.id} 
+                          onMemberAdded={fetchGroups}
+                        />
+                      )}
+                      {group.is_member && !group.is_creator ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => leaveGroup(group.id)}
+                        >
+                          Leave
+                        </Button>
+                      ) : !group.is_member && (
+                        <Button
+                          size="sm"
+                          onClick={() => joinGroup(group.id)}
+                          disabled={(group.member_count || 0) >= group.max_members}
+                        >
+                          Join
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

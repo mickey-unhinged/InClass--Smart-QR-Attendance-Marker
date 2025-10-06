@@ -59,13 +59,36 @@ export default function AttendanceManagement() {
   };
 
   const addManualAttendance = async () => {
-    if (!sessionId || !selectedStudent) return;
+    if (!sessionId || !selectedStudent.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a student email',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Look up student by email
+    const { data: studentProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', selectedStudent.trim())
+      .maybeSingle();
+
+    if (profileError || !studentProfile) {
+      toast({
+        title: 'Error',
+        description: 'Student not found with that email address',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     const { error: recordError } = await supabase
       .from('attendance_records')
       .insert({
         session_id: sessionId,
-        student_id: selectedStudent,
+        student_id: studentProfile.id,
         manually_added: true,
       });
 
@@ -74,7 +97,7 @@ export default function AttendanceManagement() {
         .from('attendance_adjustments')
         .insert({
           session_id: sessionId,
-          student_id: selectedStudent,
+          student_id: studentProfile.id,
           adjustment_type: 'manual_add',
           reason,
           adjusted_by: user?.id,
@@ -87,13 +110,20 @@ export default function AttendanceManagement() {
           description: 'Attendance manually added',
         });
         setManualAddOpen(false);
+        setSelectedStudent('');
         setReason('');
         fetchAttendees();
+      } else {
+        toast({
+          title: 'Error',
+          description: `Failed to log adjustment: ${adjustmentError.message}`,
+          variant: 'destructive',
+        });
       }
     } else {
       toast({
         title: 'Error',
-        description: 'Failed to add attendance',
+        description: `Failed to add attendance: ${recordError.message}`,
         variant: 'destructive',
       });
     }

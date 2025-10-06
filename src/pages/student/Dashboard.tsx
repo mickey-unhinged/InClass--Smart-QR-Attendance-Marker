@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import BrowseClasses from './BrowseClasses';
 import SessionNotifications from '@/components/SessionNotifications';
+import AnnouncementsInbox from '@/components/AnnouncementsInbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,12 +90,11 @@ export default function StudentDashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('student_id', user.id);
 
-      // Calculate overall attendance percentage
+      // Calculate overall attendance percentage - count ALL sessions (active=false means ended)
       const { count: totalSessions } = await supabase
         .from('attendance_sessions')
         .select('*', { count: 'exact', head: true })
-        .in('class_id', enrolledClassIds)
-        .eq('is_active', false);
+        .in('class_id', enrolledClassIds);
 
       const attendancePercentage = totalSessions && totalSessions > 0
         ? Math.round((attendedSessions || 0) / totalSessions * 100)
@@ -375,6 +375,9 @@ export default function StudentDashboard() {
               </CardContent>
             </Card>
           )}
+
+          {/* Announcements Inbox */}
+          <AnnouncementsInbox />
 
           {/* Browse Classes Section */}
           <BrowseClasses />
