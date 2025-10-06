@@ -246,16 +246,28 @@ export default function Scanner() {
       }
 
       // Update attendance insights asynchronously (non-blocking)
+      console.info('Invoking update-attendance-patterns edge function...', {
+        studentId: user.id,
+        classId: session.class_id,
+        sessionId: session.id,
+      });
+      
       try {
-        await supabase.functions.invoke('update-attendance-patterns', {
+        const { data: fnData, error: fnError } = await supabase.functions.invoke('update-attendance-patterns', {
           body: {
             studentId: user.id,
             classId: session.class_id,
             sessionId: session.id,
           },
         });
+
+        if (fnError) {
+          console.error('update-attendance-patterns error:', fnError);
+        } else {
+          console.info('update-attendance-patterns success:', fnData);
+        }
       } catch (fnErr: any) {
-        console.warn('update-attendance-patterns failed:', fnErr?.message || fnErr);
+        console.error('update-attendance-patterns exception:', fnErr?.message || fnErr, fnErr);
       }
 
       // Success!

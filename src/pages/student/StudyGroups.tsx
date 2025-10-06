@@ -38,6 +38,46 @@ export default function StudyGroups() {
   useEffect(() => {
     if (user) {
       fetchGroups();
+
+      // Realtime subscription for study_groups
+      const groupsChannel = supabase
+        .channel('study-groups-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'study_groups',
+          },
+          () => {
+            console.info('Study groups table changed, refetching...');
+            fetchGroups();
+          }
+        )
+        .subscribe();
+
+      // Realtime subscription for study_group_members (filtered to current user)
+      const membersChannel = supabase
+        .channel('study-group-members-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'study_group_members',
+            filter: `student_id=eq.${user.id}`,
+          },
+          () => {
+            console.info('Study group members changed for current user, refetching...');
+            fetchGroups();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(groupsChannel);
+        supabase.removeChannel(membersChannel);
+      };
     }
   }, [user]);
 
@@ -60,14 +100,17 @@ export default function StudyGroups() {
     if (groupsData) {
       const groupsWithCounts = await Promise.all(
         groupsData.map(async (group) => {
-          const { count } = await supabase
+          const { count, error: countError } = await supabase
             .from('study_group_members')
             .select('*', { count: 'exact', head: true })
             .eq('group_id', group.id);
 
+          // If RLS blocks count, show undefined to display "–" in UI
+          const memberCount = countError ? undefined : (count || 0);
+
           return {
             ...group,
-            member_count: count || 0,
+            member_count: memberCount,
             is_member: memberGroupIds.includes(group.id),
             is_creator: group.created_by === user?.id,
           };
@@ -148,6 +191,9 @@ export default function StudyGroups() {
 
     if (insertError) {
       console.error('Study group creation error:', insertError);
+      console.error('Error code:', insertError.code);
+      console.error('Error details:', insertError.details);
+      console.error('Error hint:', insertError.hint);
       toast({
         title: 'Error',
         description: `Failed to create study group: ${insertError.code || ''} ${insertError.message}`,
@@ -364,7 +410,7 @@ export default function StudyGroups() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary">
-                              {group.member_count}/{group.max_members} members
+                              {group.member_count !== undefined ? `${group.member_count}/${group.max_members}` : '–'} members
                             </Badge>
                             {group.is_public && <Badge>Public</Badge>}
                             {group.is_creator && <Badge variant="default">Creator</Badge>}
@@ -414,7 +460,7 @@ export default function StudyGroups() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary">
-                              {group.member_count}/{group.max_members} members
+                              {group.member_count !== undefined ? `${group.member_count}/${group.max_members}` : '–'} members
                             </Badge>
                             {group.is_public && <Badge>Public</Badge>}
                           </div>
