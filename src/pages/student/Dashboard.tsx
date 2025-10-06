@@ -28,12 +28,29 @@ export default function StudentDashboard() {
     upcomingClasses: [] as any[],
   });
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
     if (user) {
       fetchStats();
+      fetchUserName();
     }
   }, [user]);
+
+  const fetchUserName = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', user.id)
+      .maybeSingle();
+    
+    setUserName(
+      data?.full_name || 
+      data?.email?.split('@')[0] || 
+      'Student'
+    );
+  };
 
   const fetchStats = async () => {
     if (!user) return;
@@ -193,7 +210,7 @@ export default function StudentDashboard() {
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
             <p className="text-muted-foreground mt-2">
-              Track your attendance and manage your classes
+              Welcome back{userName && `, ${userName}`}! Track your attendance and manage your classes
             </p>
           </div>
 

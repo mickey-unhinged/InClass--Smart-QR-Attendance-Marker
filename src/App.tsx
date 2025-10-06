@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "next-themes";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
@@ -15,6 +16,7 @@ import ActiveSession from "./pages/lecturer/ActiveSession";
 import SessionHistory from "./pages/lecturer/SessionHistory";
 import LecturerReports from "./pages/lecturer/Reports";
 import LecturerAnalytics from "./pages/lecturer/Analytics";
+import LecturerSettings from "./pages/lecturer/Settings";
 import StudentDashboard from "./pages/student/Dashboard";
 import Scanner from "./pages/student/Scanner";
 import AttendanceHistory from "./pages/student/AttendanceHistory";
@@ -25,11 +27,12 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/landing" element={<Landing />} />
@@ -93,6 +96,14 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/lecturer/settings" 
+              element={
+                <ProtectedRoute requiredRole="lecturer">
+                  <LecturerSettings />
+                </ProtectedRoute>
+              } 
+            />
             
             {/* Student Routes */}
             <Route 
@@ -131,9 +142,10 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

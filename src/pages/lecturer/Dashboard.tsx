@@ -26,12 +26,29 @@ export default function LecturerDashboard() {
     recentSessions: [] as any[],
   });
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
     if (user) {
       fetchDashboardStats();
+      fetchUserName();
     }
   }, [user]);
+
+  const fetchUserName = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', user.id)
+      .maybeSingle();
+    
+    setUserName(
+      data?.full_name || 
+      data?.email?.split('@')[0] || 
+      'Lecturer'
+    );
+  };
 
   const fetchDashboardStats = async () => {
     if (!user) return;
@@ -125,7 +142,7 @@ export default function LecturerDashboard() {
             <GraduationCap className="w-8 h-8 text-primary" />
             <div>
               <h1 className="text-2xl font-bold text-foreground">InClass Lecturer</h1>
-              <p className="text-sm text-muted-foreground">Welcome back!</p>
+              <p className="text-sm text-muted-foreground">Welcome back{userName && `, ${userName}`}!</p>
             </div>
           </div>
           
@@ -139,7 +156,7 @@ export default function LecturerDashboard() {
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/lecturer/start-session')}>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/classes')}>
                 <QrCode className="w-4 h-4 mr-2" />
                 Start Session
               </DropdownMenuItem>
@@ -147,7 +164,7 @@ export default function LecturerDashboard() {
                 <BookOpen className="w-4 h-4 mr-2" />
                 Manage Classes
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/lecturer/session-history')}>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/history')}>
                 <History className="w-4 h-4 mr-2" />
                 Session History
               </DropdownMenuItem>
@@ -158,6 +175,11 @@ export default function LecturerDashboard() {
               <DropdownMenuItem onClick={() => navigate('/lecturer/analytics')}>
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/lecturer/settings')}>
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut}>

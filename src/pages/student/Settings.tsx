@@ -6,13 +6,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Bell, MapPin, Shield } from 'lucide-react';
+import { ArrowLeft, Bell, MapPin, Shield, Palette } from 'lucide-react';
 import { requestNotificationPermission } from '@/lib/notifications';
+import { useTheme } from 'next-themes';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [locationEnabled, setLocationEnabled] = useState(false);
 
@@ -152,6 +161,38 @@ export default function Settings() {
                   checked={locationEnabled}
                   onCheckedChange={handleLocationToggle}
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5" />
+                Appearance
+              </CardTitle>
+              <CardDescription>
+                Customize how the app looks
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="theme" className="flex flex-col gap-1">
+                  <span>Theme</span>
+                  <span className="text-sm font-normal text-muted-foreground">
+                    Choose your preferred color theme
+                  </span>
+                </Label>
+                <Select value={theme} onValueChange={setTheme}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
