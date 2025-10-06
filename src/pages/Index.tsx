@@ -7,16 +7,18 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user && userRole) {
-      // Redirect authenticated users to their dashboard
-      if (userRole === 'lecturer') {
-        navigate('/lecturer');
-      } else if (userRole === 'student') {
-        navigate('/student');
+    if (!loading) {
+      if (user && userRole) {
+        // Redirect authenticated users to their dashboard
+        if (userRole === 'lecturer') {
+          navigate('/lecturer/dashboard');
+        } else if (userRole === 'student') {
+          navigate('/student/dashboard');
+        }
+      } else {
+        // Redirect unauthenticated users to auth page
+        navigate('/auth');
       }
-    } else if (!loading && !user) {
-      // Redirect unauthenticated users to auth page
-      navigate('/auth');
     }
   }, [user, userRole, loading, navigate]);
 

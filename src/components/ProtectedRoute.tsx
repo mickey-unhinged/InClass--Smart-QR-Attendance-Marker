@@ -24,9 +24,9 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   if (requiredRole && userRole !== requiredRole) {
     // Redirect to appropriate dashboard based on user role
     if (userRole === 'lecturer') {
-      return <Navigate to="/lecturer" replace />;
+      return <Navigate to="/lecturer/dashboard" replace />;
     } else if (userRole === 'student') {
-      return <Navigate to="/student" replace />;
+      return <Navigate to="/student/dashboard" replace />;
     }
     return <Navigate to="/auth" replace />;
   }

@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', userId)
         .order('created_at', { ascending: true })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching user role:', error);

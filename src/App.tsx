@@ -7,8 +7,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import LecturerDashboard from "./pages/LecturerDashboard";
-import StudentDashboard from "./pages/StudentDashboard";
+import LecturerDashboard from "./pages/lecturer/Dashboard";
+import StudentDashboard from "./pages/student/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,7 +24,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route
-              path="/lecturer"
+              path="/lecturer/dashboard"
               element={
                 <ProtectedRoute requiredRole="lecturer">
                   <LecturerDashboard />
@@ -32,7 +32,7 @@ const App = () => (
               }
             />
             <Route
-              path="/student"
+              path="/student/dashboard"
               element={
                 <ProtectedRoute requiredRole="student">
                   <StudentDashboard />
