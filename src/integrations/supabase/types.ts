@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       attendance_records: {
         Row: {
+          device_fingerprint: string | null
           device_info: Json | null
           id: string
           scanned_at: string | null
@@ -23,6 +24,7 @@ export type Database = {
           student_id: string
         }
         Insert: {
+          device_fingerprint?: string | null
           device_info?: Json | null
           id?: string
           scanned_at?: string | null
@@ -30,6 +32,7 @@ export type Database = {
           student_id: string
         }
         Update: {
+          device_fingerprint?: string | null
           device_info?: Json | null
           id?: string
           scanned_at?: string | null

@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { QRScanner } from '@/components/QRScanner';
 import { QrCode, CheckCircle2, LogOut, Camera } from 'lucide-react';
 import { validateSessionCode } from '@/lib/qrcode';
+import { getDeviceFingerprint } from '@/lib/securityUtils';
 
 export default function Scanner() {
   const { user, signOut } = useAuth();
@@ -65,15 +66,68 @@ export default function Scanner() {
         return;
       }
 
-      // Record attendance
+      // Generate device fingerprint for fraud prevention
+      const deviceFingerprint = getDeviceFingerprint();
+
+      // SECURITY CHECK 1: Has this device already been used by another student in this session?
+      const { data: deviceCheck } = await supabase
+        .from('attendance_records')
+        .select('student_id')
+        .eq('session_id', session.id)
+        .eq('device_fingerprint', deviceFingerprint)
+        .neq('student_id', user.id)
+        .maybeSingle();
+
+      if (deviceCheck) {
+        toast({
+          title: 'Device Already Used',
+          description: 'This device has already been used by another student for this session. Each student must use their own device.',
+          variant: 'destructive',
+        });
+        setScanning(false);
+        return;
+      }
+
+      // SECURITY CHECK 2: Has this student already scanned from a different device?
+      const { data: studentCheck } = await supabase
+        .from('attendance_records')
+        .select('device_fingerprint')
+        .eq('session_id', session.id)
+        .eq('student_id', user.id)
+        .maybeSingle();
+
+      if (studentCheck && studentCheck.device_fingerprint !== deviceFingerprint) {
+        toast({
+          title: 'Different Device Detected',
+          description: 'You have already marked attendance from a different device. You cannot mark attendance again from this device.',
+          variant: 'destructive',
+        });
+        setScanning(false);
+        return;
+      }
+
+      // SECURITY CHECK 3: Duplicate scan prevention (same student, same session, same device)
+      if (studentCheck && studentCheck.device_fingerprint === deviceFingerprint) {
+        toast({
+          title: 'Already Marked',
+          description: 'You have already marked attendance for this session from this device.',
+          variant: 'destructive',
+        });
+        setScanning(false);
+        return;
+      }
+
+      // Record attendance with device fingerprint
       const { error: recordError } = await supabase
         .from('attendance_records')
         .insert({
           session_id: session.id,
           student_id: user.id,
+          device_fingerprint: deviceFingerprint,
           device_info: {
             userAgent: navigator.userAgent,
             timestamp: new Date().toISOString(),
+            fingerprint: deviceFingerprint,
           }
         });
 

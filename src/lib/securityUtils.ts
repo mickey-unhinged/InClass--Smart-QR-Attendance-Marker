@@ -35,16 +35,29 @@ export const validateDeviceId = async (studentId: string, deviceId: string): Pro
 };
 
 export const getDeviceFingerprint = (): string => {
+  // Combine multiple device characteristics for robust fingerprinting
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
+  let canvasFingerprint = '';
+  
   if (ctx) {
     ctx.textBaseline = 'top';
     ctx.font = '14px Arial';
     ctx.fillText('Device Fingerprint', 2, 2);
+    canvasFingerprint = canvas.toDataURL();
   }
   
-  const fingerprint = canvas.toDataURL();
-  return btoa(fingerprint.substring(0, 100));
+  // Combine multiple factors for stronger fingerprint
+  const fingerprint = [
+    canvasFingerprint.substring(0, 100),
+    navigator.userAgent,
+    navigator.language,
+    screen.width + 'x' + screen.height,
+    new Date().getTimezoneOffset().toString(),
+    navigator.hardwareConcurrency?.toString() || 'unknown'
+  ].join('|');
+  
+  return btoa(fingerprint);
 };
 
 export const preventScreenshot = (callback: () => void) => {
