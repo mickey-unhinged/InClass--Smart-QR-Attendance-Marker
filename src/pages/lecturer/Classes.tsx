@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, BookOpen, Users, LogOut, Trash2 } from 'lucide-react';
+import { Plus, BookOpen, Users, LogOut, Trash2, Megaphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -296,13 +296,22 @@ export default function LecturerClasses() {
                       <Users className="h-4 w-4" />
                       <span className="font-medium">{cls.enrollment_count || 0} students enrolled</span>
                     </div>
-                    <Button 
-                      onClick={() => navigate(`/lecturer/session/${cls.id}`)}
-                      className="w-full" 
-                      size="sm"
-                    >
-                      Start Session
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => navigate(`/lecturer/session/${cls.id}`)}
+                        className="flex-1" 
+                        size="sm"
+                      >
+                        Start Session
+                      </Button>
+                      <Button 
+                        onClick={() => navigate(`/lecturer/announcements?classId=${cls.id}`)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Megaphone className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

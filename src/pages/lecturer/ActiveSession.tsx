@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateQRCode } from '@/lib/qrcode';
 import { preventScreenshot } from '@/lib/securityUtils';
 import { requestNotificationPermission, notifySessionActive } from '@/lib/notifications';
-import { X, Users, Clock, CheckCircle2, LogOut, Shield, MapPin } from 'lucide-react';
+import { X, Users, Clock, CheckCircle2, LogOut, Shield, MapPin, Settings } from 'lucide-react';
 
 interface Session {
   id: string;
@@ -247,9 +247,19 @@ export default function ActiveSession() {
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate('/lecturer/dashboard')}>
-              ← Dashboard
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => navigate('/lecturer/dashboard')}>
+                ← Dashboard
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate(`/lecturer/attendance-management?sessionId=${sessionId}`)}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Manage
+              </Button>
+            </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">Active Session</h1>
               <p className="text-sm text-muted-foreground">

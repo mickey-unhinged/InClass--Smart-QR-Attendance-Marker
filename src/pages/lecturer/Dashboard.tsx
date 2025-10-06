@@ -174,7 +174,7 @@ export default function LecturerDashboard() {
                 <BookOpen className="w-4 h-4 mr-2" />
                 Manage Classes
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/lecturer/history')}>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/session-history')}>
                 <History className="w-4 h-4 mr-2" />
                 Session History
               </DropdownMenuItem>
@@ -189,14 +189,6 @@ export default function LecturerDashboard() {
               <DropdownMenuItem onClick={() => navigate('/lecturer/templates')}>
                 <Layout className="w-4 h-4 mr-2" />
                 Session Templates
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/lecturer/manage-attendance')}>
-                <UserCog className="w-4 h-4 mr-2" />
-                Manage Attendance
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/lecturer/announcements')}>
-                <Megaphone className="w-4 h-4 mr-2" />
-                Announcements
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/admin/dashboard')}>
@@ -384,23 +376,7 @@ export default function LecturerDashboard() {
                 Session Templates
               </Button>
               <Button 
-                onClick={() => navigate('/lecturer/manage-attendance')} 
-                className="justify-start h-12"
-                variant="outline"
-              >
-                <UserCog className="h-4 w-4 mr-2" />
-                Manage Attendance
-              </Button>
-              <Button 
-                onClick={() => navigate('/lecturer/announcements')} 
-                className="justify-start h-12"
-                variant="outline"
-              >
-                <Megaphone className="h-4 w-4 mr-2" />
-                Class Announcements
-              </Button>
-              <Button 
-                onClick={() => navigate('/lecturer/history')} 
+                onClick={() => navigate('/lecturer/session-history')} 
                 className="justify-start h-12"
                 variant="outline"
               >

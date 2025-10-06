@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, QrCode, Users, Clock, Calendar } from 'lucide-react';
+import { LogOut, QrCode, Users, Clock, Calendar, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Session {
@@ -234,6 +234,15 @@ export default function SessionHistory() {
                             {new Date(session.start_time).toLocaleTimeString()}
                           </p>
                         </div>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/lecturer/attendance-management?sessionId=${session.id}`)}
+                        >
+                          <Settings className="w-4 h-4 mr-1" />
+                          Manage
+                        </Button>
                       </div>
                     </div>
                   ))}
