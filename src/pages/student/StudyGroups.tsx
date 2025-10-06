@@ -75,12 +75,35 @@ export default function StudyGroups() {
   };
 
   const createGroup = async () => {
-    if (!user) return;
+    if (!user || !newGroup.name.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a group name',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Get first enrolled class or show error
+    const { data: enrollments } = await supabase
+      .from('student_enrollments')
+      .select('class_id')
+      .eq('student_id', user.id)
+      .limit(1);
+
+    if (!enrollments || enrollments.length === 0) {
+      toast({
+        title: 'Error',
+        description: 'You must be enrolled in at least one class to create a study group',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     const { data, error } = await supabase
       .from('study_groups')
       .insert({
-        class_id: '00000000-0000-0000-0000-000000000000', // Placeholder - should be selected from enrolled classes
+        class_id: enrollments[0].class_id,
         name: newGroup.name,
         description: newGroup.description,
         max_members: newGroup.maxMembers,

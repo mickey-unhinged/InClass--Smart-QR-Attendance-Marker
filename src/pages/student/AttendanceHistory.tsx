@@ -43,66 +43,34 @@ export default function AttendanceHistory() {
     if (!user) return;
 
     try {
+      // Optimized single query with JOIN to fetch all data at once
       const { data, error } = await supabase
         .from('attendance_records')
         .select(`
           id,
           scanned_at,
-          session_id
+          attendance_sessions!inner(
+            classes!inner(
+              course_code,
+              course_name
+            )
+          )
         `)
         .eq('student_id', user.id)
         .order('scanned_at', { ascending: false });
 
       if (error) throw error;
 
-      // Fetch session details for each record
       if (data) {
-        const enrichedData = await Promise.all(
-          data.map(async (record) => {
-            const { data: session } = await supabase
-              .from('attendance_sessions')
-              .select('class_id')
-              .eq('id', record.session_id)
-              .maybeSingle();
-            
-            if (session?.class_id) {
-              const { data: classData } = await supabase
-                .from('classes')
-                .select('course_code, course_name')
-                .eq('id', session.class_id)
-                .maybeSingle();
-              
-              return {
-                ...record,
-                attendance_sessions: {
-                  classes: classData || { 
-                    course_code: 'N/A', 
-                    course_name: 'Class Information Unavailable' 
-                  }
-                }
-              };
-            }
-            
-            return {
-              ...record,
-              attendance_sessions: { 
-                classes: { 
-                  course_code: 'N/A', 
-                  course_name: 'Class Information Unavailable' 
-                } 
-              }
-            };
-          })
-        );
-
-        setRecords(enrichedData);
-        calculateStats(enrichedData);
-        prepareChartData(enrichedData);
+        setRecords(data as any);
+        calculateStats(data);
+        prepareChartData(data);
       }
     } catch (error: any) {
+      console.error('Error fetching attendance:', error);
       toast({
         title: 'Error',
-        description: error.message,
+        description: error.message || 'Failed to load attendance history',
         variant: 'destructive',
       });
     } finally {
