@@ -71,14 +71,54 @@ export default function Scanner() {
       }
 
       // Auto-enroll student if not already enrolled
-      const { data: enrollment } = await supabase
+      const { data: enrollment, error: enrollCheckError } = await supabase
         .from('student_enrollments')
         .select('id')
         .eq('student_id', user.id)
         .eq('class_id', session.class_id)
         .maybeSingle();
 
+      if (enrollCheckError) {
+        console.error('Error checking enrollment:', enrollCheckError);
+        toast({
+          title: 'Enrollment Check Failed',
+          description: 'Unable to verify class enrollment. Please try again.',
+          variant: 'destructive',
+        });
+        setScanning(false);
+        return;
+      }
+
       if (!enrollment) {
+        // Verify user has student role before enrolling
+        const { data: userRole, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'student')
+          .maybeSingle();
+
+        if (roleError) {
+          console.error('Error checking user role:', roleError);
+          toast({
+            title: 'Role Verification Failed',
+            description: 'Unable to verify student status. Please contact support.',
+            variant: 'destructive',
+          });
+          setScanning(false);
+          return;
+        }
+
+        if (!userRole) {
+          toast({
+            title: 'Student Role Required',
+            description: 'Your account needs student role access. Please contact your administrator.',
+            variant: 'destructive',
+          });
+          setScanning(false);
+          return;
+        }
+
         // Student not enrolled - auto-enroll them
         const { error: enrollError } = await supabase
           .from('student_enrollments')
@@ -89,13 +129,19 @@ export default function Scanner() {
 
         if (enrollError) {
           console.error('Auto-enrollment error:', enrollError);
-          // Continue anyway - they can still mark attendance
-        } else {
           toast({
-            title: 'Enrolled!',
-            description: `You've been automatically enrolled in ${session.classes.course_code}`,
+            title: 'Auto-Enrollment Failed',
+            description: `Unable to enroll you in ${session.classes.course_code}. Error: ${enrollError.message}`,
+            variant: 'destructive',
           });
+          setScanning(false);
+          return;
         }
+
+        toast({
+          title: 'Successfully Enrolled!',
+          description: `You've been automatically enrolled in ${session.classes.course_code}`,
+        });
       }
 
       // Generate device fingerprint for fraud prevention
