@@ -25,6 +25,7 @@ interface Session {
 interface AttendanceRecord {
   id: string;
   scanned_at: string;
+  student_id: string;
   profiles: {
     full_name: string | null;
     email: string;
@@ -73,8 +74,29 @@ export default function ActiveSession() {
           table: 'attendance_records',
           filter: `session_id=eq.${sessionId}`,
         },
-        () => {
-          fetchAttendees();
+        async (payload) => {
+          // Fetch the profile for the new attendee instantly
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', payload.new.student_id)
+            .single();
+          
+          // Add the new attendee to the top of the list immediately
+          const newAttendee: AttendanceRecord = {
+            id: payload.new.id,
+            scanned_at: payload.new.scanned_at,
+            student_id: payload.new.student_id,
+            profiles: profile || { full_name: null, email: 'Unknown' }
+          };
+          
+          setAttendees((prev) => [newAttendee, ...prev]);
+          
+          // Show toast notification
+          toast({
+            title: 'New Attendance',
+            description: `${profile?.full_name || profile?.email || 'Student'} just checked in`,
+          });
         }
       )
       .subscribe();
@@ -82,7 +104,7 @@ export default function ActiveSession() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [session, sessionId]);
+  }, [session, sessionId, toast]);
 
   useEffect(() => {
     if (!session) return;
@@ -160,7 +182,7 @@ export default function ActiveSession() {
               .from('profiles')
               .select('full_name, email')
               .eq('id', record.student_id)
-              .single();
+              .maybeSingle();
             
             return {
               ...record,
