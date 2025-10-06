@@ -70,6 +70,34 @@ export default function Scanner() {
         return;
       }
 
+      // Auto-enroll student if not already enrolled
+      const { data: enrollment } = await supabase
+        .from('student_enrollments')
+        .select('id')
+        .eq('student_id', user.id)
+        .eq('class_id', session.class_id)
+        .maybeSingle();
+
+      if (!enrollment) {
+        // Student not enrolled - auto-enroll them
+        const { error: enrollError } = await supabase
+          .from('student_enrollments')
+          .insert({
+            student_id: user.id,
+            class_id: session.class_id,
+          });
+
+        if (enrollError) {
+          console.error('Auto-enrollment error:', enrollError);
+          // Continue anyway - they can still mark attendance
+        } else {
+          toast({
+            title: 'Enrolled!',
+            description: `You've been automatically enrolled in ${session.classes.course_code}`,
+          });
+        }
+      }
+
       // Generate device fingerprint for fraud prevention
       const deviceFingerprint = await getStableDeviceFingerprint();
 
