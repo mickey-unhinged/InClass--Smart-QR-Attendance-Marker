@@ -21,7 +21,13 @@ import StudentDashboard from "./pages/student/Dashboard";
 import Scanner from "./pages/student/Scanner";
 import AttendanceHistory from "./pages/student/AttendanceHistory";
 import StudentSettings from "./pages/student/Settings";
+import AttendanceInsights from "./pages/student/AttendanceInsights";
+import Badges from "./pages/student/Badges";
+import StudyGroups from "./pages/student/StudyGroups";
+import SessionTemplates from "./pages/lecturer/SessionTemplates";
+import AttendanceManagement from "./pages/lecturer/AttendanceManagement";
 import NotFound from "./pages/NotFound";
+import OfflineIndicator from "./components/OfflineIndicator";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +39,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+          <OfflineIndicator />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/landing" element={<Landing />} />
@@ -104,6 +111,22 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/lecturer/templates" 
+              element={
+                <ProtectedRoute requiredRole="lecturer">
+                  <SessionTemplates />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/lecturer/manage-attendance" 
+              element={
+                <ProtectedRoute requiredRole="lecturer">
+                  <AttendanceManagement />
+                </ProtectedRoute>
+              } 
+            />
             
             {/* Student Routes */}
             <Route 
@@ -135,6 +158,30 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="student">
                   <StudentSettings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student/insights" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <AttendanceInsights />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student/badges" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <Badges />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student/study-groups" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudyGroups />
                 </ProtectedRoute>
               } 
             />
