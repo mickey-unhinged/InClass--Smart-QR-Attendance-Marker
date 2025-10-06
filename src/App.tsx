@@ -12,6 +12,7 @@ import LecturerClasses from "./pages/lecturer/Classes";
 import StartSession from "./pages/lecturer/StartSession";
 import ActiveSession from "./pages/lecturer/ActiveSession";
 import SessionHistory from "./pages/lecturer/SessionHistory";
+import LecturerReports from "./pages/lecturer/Reports";
 import StudentDashboard from "./pages/student/Dashboard";
 import Scanner from "./pages/student/Scanner";
 import AttendanceHistory from "./pages/student/AttendanceHistory";
@@ -69,6 +70,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="lecturer">
                   <SessionHistory />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/lecturer/reports" 
+              element={
+                <ProtectedRoute requiredRole="lecturer">
+                  <LecturerReports />
                 </ProtectedRoute>
               } 
             />

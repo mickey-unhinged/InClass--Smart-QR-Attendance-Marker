@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, QrCode, BarChart3, LogOut, BookOpen } from 'lucide-react';
+import { Users, QrCode, BarChart3, LogOut, BookOpen, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function LecturerDashboard() {
@@ -35,14 +35,14 @@ export default function LecturerDashboard() {
           {/* Quick Actions */}
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
             <CardContent className="pt-6">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <Button 
                   onClick={() => navigate('/lecturer/classes')}
                   size="lg" 
                   className="h-16"
                 >
                   <BookOpen className="w-5 h-5 mr-2" />
-                  Manage Classes
+                  Classes
                 </Button>
                 <Button 
                   onClick={() => navigate('/lecturer/history')}
@@ -51,7 +51,25 @@ export default function LecturerDashboard() {
                   className="h-16"
                 >
                   <QrCode className="w-5 h-5 mr-2" />
-                  Session History
+                  History
+                </Button>
+                <Button 
+                  onClick={() => navigate('/lecturer/reports')}
+                  size="lg" 
+                  variant="outline"
+                  className="h-16"
+                >
+                  <FileText className="w-5 h-5 mr-2" />
+                  Reports
+                </Button>
+                <Button 
+                  onClick={signOut}
+                  size="lg" 
+                  variant="outline"
+                  className="h-16"
+                >
+                  <LogOut className="w-5 h-5 mr-2" />
+                  Sign Out
                 </Button>
               </div>
             </CardContent>
@@ -82,21 +100,21 @@ export default function LecturerDashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Attendance</CardTitle>
+                <CardTitle className="text-sm font-medium">Reports</CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">-</div>
-                <p className="text-xs text-muted-foreground">Coming in Phase 4</p>
+                <div className="text-2xl font-bold">✓</div>
+                <p className="text-xs text-muted-foreground">Export attendance data</p>
               </CardContent>
             </Card>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Phase 2 Complete: QR Code Core</CardTitle>
+              <CardTitle>Phase 5 Complete: Reports & Analytics</CardTitle>
               <CardDescription>
-                You can now generate QR codes and track attendance in real-time!
+                You can now export attendance reports and view analytics!
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -106,14 +124,15 @@ export default function LecturerDashboard() {
                   <li>• Create and manage classes</li>
                   <li>• Generate time-limited QR codes</li>
                   <li>• Real-time attendance tracking</li>
-                  <li>• Live student check-in feed</li>
-                  <li>• Session management with auto-expiry</li>
+                  <li>• Export reports (PDF & CSV)</li>
+                  <li>• Student attendance charts</li>
+                  <li>• Browser notifications</li>
                 </ul>
               </div>
               <div className="space-y-2">
                 <h3 className="font-medium">⏳ Coming Next:</h3>
                 <p className="text-sm text-muted-foreground">
-                  Phase 4 will add attendance history, reports, and analytics.
+                  Phase 6-9 will add security features, location verification, advanced analytics, and UI polish.
                 </p>
               </div>
             </CardContent>

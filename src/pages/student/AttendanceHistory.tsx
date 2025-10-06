@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, Calendar, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 interface AttendanceRecord {
   id: string;
@@ -17,6 +18,8 @@ interface AttendanceRecord {
     };
   };
 }
+
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', '#8884d8', '#82ca9d', '#ffc658'];
 
 export default function AttendanceHistory() {
   const { user, signOut } = useAuth();
@@ -30,6 +33,7 @@ export default function AttendanceHistory() {
     thisWeek: 0,
     thisMonth: 0,
   });
+  const [chartData, setChartData] = useState<{ name: string; value: number }[]>([]);
 
   useEffect(() => {
     fetchAttendance();
@@ -70,6 +74,7 @@ export default function AttendanceHistory() {
 
         setRecords(enrichedData);
         calculateStats(enrichedData);
+        prepareChartData(enrichedData);
       }
     } catch (error: any) {
       toast({
@@ -95,6 +100,22 @@ export default function AttendanceHistory() {
       thisWeek,
       thisMonth,
     });
+  };
+
+  const prepareChartData = (data: any[]) => {
+    const classCount: { [key: string]: number } = {};
+    
+    data.forEach(record => {
+      const className = record.attendance_sessions.classes.course_name;
+      classCount[className] = (classCount[className] || 0) + 1;
+    });
+
+    const chartArray = Object.entries(classCount).map(([name, value]) => ({
+      name,
+      value,
+    }));
+
+    setChartData(chartArray);
   };
 
   return (
@@ -151,6 +172,38 @@ export default function AttendanceHistory() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Chart Card */}
+          {chartData.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Attendance by Course</CardTitle>
+                <CardDescription>Distribution of your attendance across classes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry) => entry.name}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {chartData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Attendance Records */}
           <Card>
