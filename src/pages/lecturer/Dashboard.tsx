@@ -36,6 +36,65 @@ export default function LecturerDashboard() {
     }
   }, [user]);
 
+  // Real-time subscriptions for live updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('dashboard-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'classes',
+          filter: `lecturer_id=eq.${user.id}`,
+        },
+        () => {
+          fetchDashboardStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'attendance_sessions',
+          filter: `lecturer_id=eq.${user.id}`,
+        },
+        () => {
+          fetchDashboardStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'student_enrollments',
+        },
+        () => {
+          fetchDashboardStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'attendance_records',
+        },
+        () => {
+          fetchDashboardStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const fetchUserName = async () => {
     if (!user) return;
     const { data } = await supabase
