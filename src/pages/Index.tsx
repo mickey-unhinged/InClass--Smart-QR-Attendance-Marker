@@ -16,8 +16,8 @@ const Index = () => {
           navigate('/student/dashboard');
         }
       } else {
-        // Redirect unauthenticated users to auth page
-        navigate('/auth');
+        // Redirect unauthenticated users to landing page
+        navigate('/landing');
       }
     }
   }, [user, userRole, loading, navigate]);

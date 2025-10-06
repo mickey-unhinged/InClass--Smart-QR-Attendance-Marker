@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import LecturerDashboard from "./pages/lecturer/Dashboard";
 import LecturerClasses from "./pages/lecturer/Classes";
@@ -13,6 +14,7 @@ import StartSession from "./pages/lecturer/StartSession";
 import ActiveSession from "./pages/lecturer/ActiveSession";
 import SessionHistory from "./pages/lecturer/SessionHistory";
 import LecturerReports from "./pages/lecturer/Reports";
+import LecturerAnalytics from "./pages/lecturer/Analytics";
 import StudentDashboard from "./pages/student/Dashboard";
 import Scanner from "./pages/student/Scanner";
 import AttendanceHistory from "./pages/student/AttendanceHistory";
@@ -30,6 +32,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/landing" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             
             {/* Lecturer Routes */}
@@ -79,6 +82,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="lecturer">
                   <LecturerReports />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/lecturer/analytics" 
+              element={
+                <ProtectedRoute requiredRole="lecturer">
+                  <LecturerAnalytics />
                 </ProtectedRoute>
               } 
             />

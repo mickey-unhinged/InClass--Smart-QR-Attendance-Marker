@@ -63,13 +63,13 @@ export default function LecturerDashboard() {
                   Reports
                 </Button>
                 <Button 
-                  onClick={signOut}
+                  onClick={() => navigate('/lecturer/analytics')}
                   size="lg" 
                   variant="outline"
                   className="h-16"
                 >
-                  <LogOut className="w-5 h-5 mr-2" />
-                  Sign Out
+                  <BarChart3 className="w-5 h-5 mr-2" />
+                  Analytics
                 </Button>
               </div>
             </CardContent>
@@ -100,41 +100,46 @@ export default function LecturerDashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Reports</CardTitle>
+                <CardTitle className="text-sm font-medium">Analytics</CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">✓</div>
-                <p className="text-xs text-muted-foreground">Export attendance data</p>
+                <p className="text-xs text-muted-foreground">Advanced insights available</p>
               </CardContent>
             </Card>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>🎉 Phases 1-7 Complete!</CardTitle>
+              <CardTitle>🎉 All Phases Complete!</CardTitle>
               <CardDescription>
-                Full-featured attendance management system
+                Production-ready attendance management system
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <h3 className="font-medium">✅ What's Working Now:</h3>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Create and manage classes</li>
-                  <li>• Generate secure, time-limited QR codes</li>
-                  <li>• Real-time attendance tracking with live feed</li>
-                  <li>• Export reports (PDF & CSV)</li>
-                  <li>• Student attendance analytics & charts</li>
-                  <li>• Browser notifications</li>
-                  <li>• Security features: screenshot prevention, duplicate scan protection</li>
-                  <li>• Optional location verification</li>
-                </ul>
+                <h3 className="font-medium">✅ Full Feature Set:</h3>
+                <div className="grid md:grid-cols-2 gap-2">
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Authentication & role management</li>
+                    <li>• Class & session management</li>
+                    <li>• Secure QR code generation</li>
+                    <li>• Real-time attendance tracking</li>
+                    <li>• PDF & CSV report exports</li>
+                  </ul>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Advanced analytics & insights</li>
+                    <li>• Student attendance charts</li>
+                    <li>• Browser notifications</li>
+                    <li>• Security & fraud prevention</li>
+                    <li>• Optional location verification</li>
+                  </ul>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-medium">⏳ Next Steps:</h3>
-                <p className="text-sm text-muted-foreground">
-                  Ready for production use! Advanced analytics and UI polish ongoing.
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-4 border border-primary/20">
+                <p className="text-sm font-medium">
+                  🎓 Ready for deployment! InClass provides comprehensive attendance tracking with enterprise-grade security.
                 </p>
               </div>
             </CardContent>
