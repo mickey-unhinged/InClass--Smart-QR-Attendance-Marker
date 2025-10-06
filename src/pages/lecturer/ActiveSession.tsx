@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateQRCode } from '@/lib/qrcode';
 import { preventScreenshot } from '@/lib/securityUtils';
 import { requestNotificationPermission, notifySessionActive } from '@/lib/notifications';
-import { X, Users, Clock, CheckCircle2, LogOut, Shield } from 'lucide-react';
+import { X, Users, Clock, CheckCircle2, LogOut, Shield, MapPin } from 'lucide-react';
 
 interface Session {
   id: string;
@@ -16,6 +16,10 @@ interface Session {
   end_time: string;
   duration_minutes: number;
   is_active: boolean;
+  location_required: boolean;
+  classroom_latitude: number | null;
+  classroom_longitude: number | null;
+  geofence_radius_meters: number | null;
   classes: {
     course_code: string;
     course_name: string;
@@ -301,6 +305,18 @@ export default function ActiveSession() {
                     <p className="text-xs text-orange-700 dark:text-orange-300">Screenshot & fraud prevention enabled</p>
                   </div>
                 </div>
+
+                {session?.location_required && (
+                  <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/5 rounded-lg p-4 flex items-center gap-2 border border-blue-500/20">
+                    <MapPin className="w-5 h-5 text-blue-600" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-900 dark:text-blue-100">Location Verification</p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        {session.geofence_radius_meters}m radius from classroom
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Button onClick={endSession} variant="destructive" className="w-full" size="lg">

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, History, FileText, BarChart3, LogOut, Users, TrendingUp, AlertCircle, Plus, GraduationCap, Menu, QrCode, Settings } from 'lucide-react';
+import { BookOpen, History, FileText, BarChart3, LogOut, Users, TrendingUp, AlertCircle, Plus, GraduationCap, Menu, QrCode, Settings, Layout, UserCog, Megaphone, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -186,6 +186,23 @@ export default function LecturerDashboard() {
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/templates')}>
+                <Layout className="w-4 h-4 mr-2" />
+                Session Templates
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/manage-attendance')}>
+                <UserCog className="w-4 h-4 mr-2" />
+                Manage Attendance
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/lecturer/announcements')}>
+                <Megaphone className="w-4 h-4 mr-2" />
+                Announcements
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/admin/dashboard')}>
+                <ShieldCheck className="w-4 h-4 mr-2" />
+                Admin Dashboard
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/lecturer/settings')}>
                 <Settings className="w-4 h-4 mr-2" />
@@ -349,14 +366,38 @@ export default function LecturerDashboard() {
                 Manage your classes and sessions efficiently
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-3 md:grid-cols-2">
+            <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               <Button 
                 onClick={() => navigate('/lecturer/classes')} 
                 className="justify-start h-12"
                 variant="outline"
               >
                 <BookOpen className="h-4 w-4 mr-2" />
-                Manage Classes & Start Sessions
+                Manage Classes
+              </Button>
+              <Button 
+                onClick={() => navigate('/lecturer/templates')} 
+                className="justify-start h-12"
+                variant="outline"
+              >
+                <Layout className="h-4 w-4 mr-2" />
+                Session Templates
+              </Button>
+              <Button 
+                onClick={() => navigate('/lecturer/manage-attendance')} 
+                className="justify-start h-12"
+                variant="outline"
+              >
+                <UserCog className="h-4 w-4 mr-2" />
+                Manage Attendance
+              </Button>
+              <Button 
+                onClick={() => navigate('/lecturer/announcements')} 
+                className="justify-start h-12"
+                variant="outline"
+              >
+                <Megaphone className="h-4 w-4 mr-2" />
+                Class Announcements
               </Button>
               <Button 
                 onClick={() => navigate('/lecturer/history')} 
@@ -364,7 +405,7 @@ export default function LecturerDashboard() {
                 variant="outline"
               >
                 <History className="h-4 w-4 mr-2" />
-                View Session History
+                Session History
               </Button>
               <Button 
                 onClick={() => navigate('/lecturer/reports')} 
