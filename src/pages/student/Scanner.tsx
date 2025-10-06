@@ -68,62 +68,8 @@ export default function Scanner() {
 
       // Generate device fingerprint for fraud prevention
       const deviceFingerprint = await getStableDeviceFingerprint();
-      console.log('🔒 Device Fingerprint Generated (hashed):', deviceFingerprint);
-      console.log('🔒 Session ID:', session.id);
-      console.log('🔒 Student ID:', user.id);
 
-      // SECURITY CHECK 1: Has this device already been used by another student in this session?
-      const { data: deviceCheck } = await supabase
-        .from('attendance_records')
-        .select('student_id')
-        .eq('session_id', session.id)
-        .eq('device_fingerprint', deviceFingerprint)
-        .neq('student_id', user.id)
-        .maybeSingle();
-
-      if (deviceCheck) {
-        toast({
-          title: 'Device Already Used',
-          description: 'This device has already been used by another student for this session. Each student must use their own device.',
-          variant: 'destructive',
-        });
-        setScanning(false);
-        return;
-      }
-
-      // SECURITY CHECK 2: Has this student already scanned from a different device?
-      const { data: studentCheck } = await supabase
-        .from('attendance_records')
-        .select('device_fingerprint')
-        .eq('session_id', session.id)
-        .eq('student_id', user.id)
-        .maybeSingle();
-
-      console.log('🔒 Student Check Result:', studentCheck);
-      
-      if (studentCheck && studentCheck.device_fingerprint !== deviceFingerprint) {
-        toast({
-          title: 'Different Device Detected',
-          description: 'You have already marked attendance from a different device. You cannot mark attendance again from this device.',
-          variant: 'destructive',
-        });
-        setScanning(false);
-        return;
-      }
-
-      // SECURITY CHECK 3: Duplicate scan prevention (same student, same session, same device)
-      if (studentCheck && studentCheck.device_fingerprint === deviceFingerprint) {
-        toast({
-          title: 'Already Marked',
-          description: 'You have already marked attendance for this session from this device.',
-          variant: 'destructive',
-        });
-        setScanning(false);
-        return;
-      }
-
-      // Record attendance with device fingerprint
-      console.log('🔒 Recording attendance with fingerprint:', deviceFingerprint);
+      // Record attendance - database enforces one device per session via unique constraint
       const { error: recordError } = await supabase
         .from('attendance_records')
         .insert({
@@ -133,17 +79,15 @@ export default function Scanner() {
           device_info: {
             userAgent: navigator.userAgent,
             timestamp: new Date().toISOString(),
-            fingerprint: deviceFingerprint,
           }
         });
-      
-      console.log('🔒 Record Error:', recordError);
 
       if (recordError) {
-        if (recordError.code === '23505') { // Unique constraint violation
+        if (recordError.code === '23505') {
+          // Database unique constraint violation - either device or student already used
           toast({
-            title: 'Already Marked',
-            description: 'You have already marked attendance for this session',
+            title: 'Cannot Mark Attendance',
+            description: 'This device has already been used for this session by another student',
             variant: 'destructive',
           });
         } else {
