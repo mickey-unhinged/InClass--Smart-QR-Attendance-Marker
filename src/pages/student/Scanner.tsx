@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { QRScanner } from '@/components/QRScanner';
 import { QrCode, CheckCircle2, LogOut, Camera } from 'lucide-react';
 import { validateSessionCode } from '@/lib/qrcode';
-import { getDeviceFingerprint } from '@/lib/securityUtils';
+import { getDeviceFingerprint, getStableDeviceFingerprint } from '@/lib/securityUtils';
 
 export default function Scanner() {
   const { user, signOut } = useAuth();
@@ -67,8 +67,8 @@ export default function Scanner() {
       }
 
       // Generate device fingerprint for fraud prevention
-      const deviceFingerprint = getDeviceFingerprint();
-      console.log('🔒 Device Fingerprint Generated:', deviceFingerprint);
+      const deviceFingerprint = await getStableDeviceFingerprint();
+      console.log('🔒 Device Fingerprint Generated (hashed):', deviceFingerprint);
       console.log('🔒 Session ID:', session.id);
       console.log('🔒 Student ID:', user.id);
 

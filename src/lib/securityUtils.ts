@@ -80,3 +80,49 @@ export const preventScreenshot = (callback: () => void) => {
     }
   });
 };
+
+// Stable, short, hashed device fingerprint to ensure non-null storage
+export const getStableDeviceFingerprint = async (): Promise<string> => {
+  try {
+    const seed = buildDeviceFingerprintSeed();
+    if (window.crypto?.subtle) {
+      const enc = new TextEncoder().encode(seed);
+      const digest = await crypto.subtle.digest('SHA-256', enc);
+      const hashArray = Array.from(new Uint8Array(digest));
+      const hex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+      return hex; // 64-char hex
+    }
+    // Fallback to base64 (trim to 128 chars max)
+    return btoa(seed).slice(0, 128);
+  } catch {
+    // Last resort: userAgent hash
+    const ua = navigator.userAgent || 'unknown';
+    return btoa(ua).slice(0, 64);
+  }
+};
+
+function buildDeviceFingerprintSeed(): string {
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    let canvasFingerprint = '';
+    if (ctx) {
+      ctx.textBaseline = 'top';
+      ctx.font = '14px Arial';
+      ctx.fillText('Device Fingerprint', 2, 2);
+      canvasFingerprint = canvas.toDataURL().slice(0, 64);
+    }
+    const parts = [
+      canvasFingerprint,
+      navigator.userAgent,
+      navigator.language,
+      `${screen.width}x${screen.height}`,
+      String(new Date().getTimezoneOffset()),
+      String(navigator.hardwareConcurrency || 'unknown'),
+      ('storage' in navigator && 'estimate' in (navigator as any).storage) ? 'se' : 'nse',
+    ];
+    return parts.join('|');
+  } catch {
+    return `${navigator.userAgent}|${navigator.language}|${screen.width}x${screen.height}`;
+  }
+}
