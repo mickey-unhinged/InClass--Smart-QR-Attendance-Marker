@@ -11,18 +11,21 @@ InClass is a comprehensive Progressive Web App (PWA) designed to revolutionize u
 ## 🎯 Features
 
 ### Phase 1-2: Core Functionality
+
 - ✅ **Role-Based Authentication**: Separate interfaces for lecturers and students
 - ✅ **QR Code Generation**: Time-limited, secure QR codes for each class session
 - ✅ **Real-time Scanning**: Instant QR code scanning with immediate confirmation
 - ✅ **Session Management**: Start/stop attendance sessions with customizable durations
 
 ### Phase 4-5: History & Reports
+
 - ✅ **Attendance History**: Complete attendance records with statistics
 - ✅ **Report Generation**: Export data as PDF and CSV
 - ✅ **Student Analytics**: Visual charts showing attendance patterns
 - ✅ **Session History**: Detailed view of past sessions with attendee counts
 
 ### Phase 6-7: Security & Notifications
+
 - ✅ **Fraud Prevention**: Screenshot detection and duplicate scan prevention
 - ✅ **Device Fingerprinting**: Track and limit scanning devices
 - ✅ **Location Verification**: Optional GPS-based attendance validation
@@ -30,6 +33,7 @@ InClass is a comprehensive Progressive Web App (PWA) designed to revolutionize u
 - ✅ **Security Monitoring**: Anti-fraud measures and session security
 
 ### Phase 8-9: Analytics & Polish
+
 - ✅ **Advanced Analytics**: Detailed insights into attendance trends
 - ✅ **Peak Hours Analysis**: Identify optimal class times
 - ✅ **Student Participation**: Track engagement across sessions
@@ -51,6 +55,7 @@ InClass is a comprehensive Progressive Web App (PWA) designed to revolutionize u
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ or Bun
 - Supabase account (via Lovable Cloud)
 
@@ -79,6 +84,7 @@ Open your browser to `http://localhost:5173`
 ## 📱 User Roles
 
 ### Lecturer Dashboard
+
 - Create and manage classes
 - Generate QR codes for attendance sessions
 - View real-time attendance feed
@@ -87,6 +93,7 @@ Open your browser to `http://localhost:5173`
 - View session history
 
 ### Student Dashboard
+
 - Scan QR codes to mark attendance
 - View personal attendance history
 - See attendance statistics and charts
@@ -105,6 +112,7 @@ Open your browser to `http://localhost:5173`
 ## 📊 Analytics Dashboard
 
 The advanced analytics page provides:
+
 - Total session count
 - Average attendance per session
 - Unique student participation
@@ -115,6 +123,7 @@ The advanced analytics page provides:
 ## 🎨 Design System
 
 InClass uses a comprehensive design system with:
+
 - HSL-based color tokens
 - Semantic color naming
 - Dark mode support
@@ -125,6 +134,7 @@ InClass uses a comprehensive design system with:
 ## 📄 Database Schema
 
 ### Key Tables
+
 - `profiles`: User information
 - `user_roles`: Role assignments (lecturer/student/admin)
 - `classes`: Course information
@@ -134,13 +144,17 @@ InClass uses a comprehensive design system with:
 ## 🔧 Configuration
 
 ### Notification Settings
+
 Enable browser notifications for:
+
 - Active session alerts
 - Attendance reminders
 - Low attendance warnings
 
 ### Location Services
+
 Configure GPS verification:
+
 - Classroom location setup
 - Verification radius (default: 100m)
 - Override permissions for special cases
@@ -150,6 +164,7 @@ Configure GPS verification:
 Simply open [Lovable](https://lovable.dev/projects/476cf355-46d5-47c2-a2ca-0903f0ab1a53) and click on Share → Publish.
 
 ### Custom Domain
+
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
@@ -170,4 +185,4 @@ MIT License - See LICENSE file for details
 
 **InClass** - Transforming attendance tracking for modern education 🎓
 
-Built with [Lovable](https://lovable.dev) - the AI-powered full-stack development platform.
+//Built with [Lovable](https://lovable.dev) - the AI-powered full-stack development platform.
