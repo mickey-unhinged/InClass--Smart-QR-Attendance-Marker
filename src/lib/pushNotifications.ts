@@ -2,8 +2,15 @@ import { supabase } from '@/integrations/supabase/client';
 
 const VAPID_PUBLIC_KEY = 'YOUR_VAPID_PUBLIC_KEY'; // Configure this
 
-// Notification permission is handled centrally in '@/lib/notifications'.
-// Import and use requestNotificationPermission from there to avoid duplication.
+export const requestNotificationPermission = async (): Promise<boolean> => {
+  if (!('Notification' in window)) {
+    console.log('This browser does not support notifications');
+    return false;
+  }
+
+  const permission = await Notification.requestPermission();
+  return permission === 'granted';
+};
 
 export const subscribeToPushNotifications = async (userId: string): Promise<void> => {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {

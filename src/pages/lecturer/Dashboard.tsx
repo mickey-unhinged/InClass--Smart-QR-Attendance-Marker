@@ -269,6 +269,11 @@ export default function LecturerDashboard() {
                 Session Templates
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/admin/dashboard')}>
+                <ShieldCheck className="w-4 h-4 mr-2" />
+                Admin Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/lecturer/settings')}>
                 <Settings className="w-4 h-4 mr-2" />
                 Settings

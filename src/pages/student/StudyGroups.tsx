@@ -38,57 +38,17 @@ export default function StudyGroups() {
   useEffect(() => {
     if (user) {
       fetchGroups();
-
-      // Realtime subscription for study_groups
-      const groupsChannel = supabase
-        .channel('study-groups-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'study_groups',
-          },
-          () => {
-            console.info('Study groups table changed, refetching...');
-            fetchGroups();
-          }
-        )
-        .subscribe();
-
-      // Realtime subscription for study_group_members (filtered to current user)
-      const membersChannel = supabase
-        .channel('study-group-members-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'study_group_members',
-            filter: `student_id=eq.${user.id}`,
-          },
-          () => {
-            console.info('Study group members changed for current user, refetching...');
-            fetchGroups();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(groupsChannel);
-        supabase.removeChannel(membersChannel);
-      };
     }
   }, [user]);
 
   const fetchGroups = async () => {
     if (!user) return;
 
-    // Fetch groups visible to the user (public, created_by user, or member of)
-    const { data: groupsData, error: groupsError } = await supabase
+    // Fetch all public groups (no filter to show both joined and not joined)
+    const { data: groupsData } = await supabase
       .from('study_groups')
       .select('*')
-      .order('created_at', { ascending: false });
+      .eq('is_public', true);
 
     const { data: memberData } = await supabase
       .from('study_group_members')
@@ -100,17 +60,14 @@ export default function StudyGroups() {
     if (groupsData) {
       const groupsWithCounts = await Promise.all(
         groupsData.map(async (group) => {
-          const { count, error: countError } = await supabase
+          const { count } = await supabase
             .from('study_group_members')
             .select('*', { count: 'exact', head: true })
             .eq('group_id', group.id);
 
-          // If RLS blocks count, show undefined to display "–" in UI
-          const memberCount = countError ? undefined : (count || 0);
-
           return {
             ...group,
-            member_count: memberCount,
+            member_count: count || 0,
             is_member: memberGroupIds.includes(group.id),
             is_creator: group.created_by === user?.id,
           };
@@ -175,8 +132,7 @@ export default function StudyGroups() {
       return;
     }
 
-    // Create the group (returning id if allowed)
-    const { data: inserted, error: insertError } = await supabase
+    const { data, error } = await supabase
       .from('study_groups')
       .insert({
         class_id: enrollments[0].class_id,
@@ -186,68 +142,44 @@ export default function StudyGroups() {
         created_by: user.id,
         is_public: true,
       })
-      .select('id')
-      .maybeSingle();
+      .select()
+      .single();
 
-    if (insertError) {
-      console.error('Study group creation error:', insertError);
-      console.error('Error code:', insertError.code);
-      console.error('Error details:', insertError.details);
-      console.error('Error hint:', insertError.hint);
+    if (error) {
+      console.error('Study group creation error:', error);
       toast({
         title: 'Error',
-        description: `Failed to create study group: ${insertError.code || ''} ${insertError.message}`,
+        description: `Failed to create study group: ${error.message}`,
         variant: 'destructive',
       });
       return;
     }
 
-    let groupId = inserted?.id as string | undefined;
+    if (data) {
+      const { error: memberError } = await supabase.from('study_group_members').insert({
+        group_id: data.id,
+        student_id: user.id,
+        role: 'creator',
+      });
 
-    if (!groupId) {
-      // Fallback: fetch the most recent group created by this user
-      const { data: latest, error: latestError } = await supabase
-        .from('study_groups')
-        .select('id')
-        .eq('created_by', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (latestError || !latest) {
+      if (memberError) {
+        console.error('Member add error:', memberError);
         toast({
-          title: 'Error',
-          description: `Group created but could not retrieve ID: ${latestError?.code || ''} ${latestError?.message || ''}`,
+          title: 'Warning',
+          description: 'Group created but failed to add you as member',
           variant: 'destructive',
         });
-        return;
+      } else {
+        toast({
+          title: 'Success',
+          description: 'Study group created successfully',
+        });
       }
-      groupId = latest.id;
+
+      setCreateDialogOpen(false);
+      setNewGroup({ name: '', description: '', maxMembers: 6 });
+      fetchGroups();
     }
-
-    const { error: memberError } = await supabase.from('study_group_members').insert({
-      group_id: groupId,
-      student_id: user.id,
-      role: 'creator',
-    });
-
-    if (memberError) {
-      console.error('Member add error:', memberError);
-      toast({
-        title: 'Warning',
-        description: `Group created but failed to add you as member: ${memberError.code || ''} ${memberError.message}`,
-        variant: 'destructive',
-      });
-    } else {
-      toast({
-        title: 'Success',
-        description: 'Study group created successfully',
-      });
-    }
-
-    setCreateDialogOpen(false);
-    setNewGroup({ name: '', description: '', maxMembers: 6 });
-    fetchGroups();
   };
 
   const joinGroup = async (groupId: string) => {
@@ -262,7 +194,7 @@ export default function StudyGroups() {
     if (error) {
       toast({
         title: 'Error',
-        description: `Failed to join group: ${error.code || ''} ${error.message}`,
+        description: 'Failed to join group',
         variant: 'destructive',
       });
     } else {
@@ -286,7 +218,7 @@ export default function StudyGroups() {
     if (error) {
       toast({
         title: 'Error',
-        description: `Failed to leave group: ${error.code || ''} ${error.message}`,
+        description: 'Failed to leave group',
         variant: 'destructive',
       });
     } else {
@@ -410,7 +342,7 @@ export default function StudyGroups() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary">
-                              {group.member_count !== undefined ? `${group.member_count}/${group.max_members}` : '–'} members
+                              {group.member_count}/{group.max_members} members
                             </Badge>
                             {group.is_public && <Badge>Public</Badge>}
                             {group.is_creator && <Badge variant="default">Creator</Badge>}
@@ -460,7 +392,7 @@ export default function StudyGroups() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary">
-                              {group.member_count !== undefined ? `${group.member_count}/${group.max_members}` : '–'} members
+                              {group.member_count}/{group.max_members} members
                             </Badge>
                             {group.is_public && <Badge>Public</Badge>}
                           </div>

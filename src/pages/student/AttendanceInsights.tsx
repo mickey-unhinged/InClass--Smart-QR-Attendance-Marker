@@ -28,28 +28,6 @@ export default function AttendanceInsights() {
   useEffect(() => {
     if (user) {
       fetchPatterns();
-
-      // Realtime subscription to attendance_patterns for current user
-      const channel = supabase
-        .channel('attendance-patterns-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'attendance_patterns',
-            filter: `student_id=eq.${user.id}`,
-          },
-          () => {
-            console.info('Attendance patterns updated, refetching...');
-            fetchPatterns();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     }
   }, [user]);
 
@@ -62,16 +40,7 @@ export default function AttendanceInsights() {
       .eq('student_id', user.id);
 
     if (!error && data) {
-      // Coerce numeric fields to ensure proper formatting
-      const processedData = data.map(p => ({
-        ...p,
-        attendance_percentage: Number(p.attendance_percentage) || 0,
-        total_sessions: Number(p.total_sessions) || 0,
-        attended_sessions: Number(p.attended_sessions) || 0,
-        streak_current: Number(p.streak_current) || 0,
-        streak_longest: Number(p.streak_longest) || 0,
-      }));
-      setPatterns(processedData as AttendancePattern[]);
+      setPatterns(data as AttendancePattern[]);
     }
     setLoading(false);
   };
@@ -88,15 +57,10 @@ export default function AttendanceInsights() {
   };
 
   const overallAttendance = patterns.length > 0
-    ? patterns.reduce((sum, p) => sum + Number(p.attendance_percentage), 0) / patterns.length
+    ? patterns.reduce((sum, p) => sum + p.attendance_percentage, 0) / patterns.length
     : 0;
 
   const atRiskClasses = patterns.filter(p => p.at_risk);
-
-  const handleRefresh = () => {
-    setLoading(true);
-    fetchPatterns();
-  };
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -105,13 +69,10 @@ export default function AttendanceInsights() {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex-1">
+          <div>
             <h1 className="text-3xl font-bold">Attendance Insights</h1>
             <p className="text-muted-foreground">Your attendance patterns and trends</p>
           </div>
-          <Button variant="outline" onClick={handleRefresh} disabled={loading}>
-            {loading ? 'Refreshing...' : 'Refresh'}
-          </Button>
         </div>
 
         {atRiskClasses.length > 0 && (
