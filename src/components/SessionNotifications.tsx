@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { requestNotificationPermission } from '@/lib/notifications';
+import { requestNotificationPermission, sendNotification } from '@/lib/notifications';
 import { useToast } from '@/hooks/use-toast';
 
 export default function SessionNotifications() {
@@ -37,15 +37,12 @@ export default function SessionNotifications() {
             const classInfo = enrollment.classes as any;
             const courseName = `${classInfo.course_code} - ${classInfo.course_name}`;
             
-            // Show browser notification
-            if (Notification.permission === 'granted') {
-              new Notification('Attendance Session Active! 🎓', {
-                body: `${courseName} - Scan now to mark attendance`,
-                icon: '/favicon.ico',
-                tag: 'session-active',
-                requireInteraction: true,
-              });
-            }
+            // Show browser notification using service worker
+            await sendNotification('Attendance Session Active! 🎓', {
+              body: `${courseName} - Scan now to mark attendance`,
+              tag: 'session-active',
+              requireInteraction: true,
+            });
 
             // Show toast notification
             toast({
@@ -99,14 +96,11 @@ export default function SessionNotifications() {
               const classInfo = enrollment.classes as any;
               const courseName = `${classInfo.course_code} - ${classInfo.course_name}`;
               
-              // Show notification for missed class
-              if (Notification.permission === 'granted') {
-                new Notification('Missed Class Alert', {
-                  body: `You missed: ${courseName}`,
-                  icon: '/favicon.ico',
-                  tag: 'missed-class',
-                });
-              }
+              // Show notification for missed class using service worker
+              await sendNotification('Missed Class Alert', {
+                body: `You missed: ${courseName}`,
+                tag: 'missed-class',
+              });
 
               toast({
                 title: 'Missed Class',

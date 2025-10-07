@@ -16,13 +16,31 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
   return false;
 };
 
-export const sendNotification = (title: string, options?: NotificationOptions) => {
-  if (Notification.permission === 'granted') {
-    new Notification(title, {
-      icon: '/favicon.ico',
-      badge: '/favicon.ico',
-      ...options,
-    });
+export const sendNotification = async (title: string, options?: NotificationOptions) => {
+  if (Notification.permission !== 'granted') {
+    console.warn('Notification permission not granted');
+    return;
+  }
+
+  try {
+    // Use service worker registration if available (required for PWA)
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification(title, {
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        ...options,
+      });
+    } else {
+      // Fallback for browsers without service worker support
+      new Notification(title, {
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        ...options,
+      });
+    }
+  } catch (error) {
+    console.error('Failed to send notification:', error);
   }
 };
 
