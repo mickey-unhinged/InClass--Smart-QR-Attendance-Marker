@@ -22,9 +22,9 @@ export default function GeofenceRadiusControl({ radius, onRadiusChange }: Geofen
               {radius < 100 ? "Very Strict" : radius < 200 ? "Strict" : radius < 300 ? "Moderate" : "Lenient"}
             </span>
           </div>
-          <Slider value={[radius]} onValueChange={(values) => onRadiusChange(values[0])} min={10} max={500} step={10} />
+          <Slider value={[radius]} onValueChange={(values) => onRadiusChange(values[0])} min={50} max={500} step={5} />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>10m</span>
+            <span>50m</span>
             <span>500m</span>
           </div>
         </div>
