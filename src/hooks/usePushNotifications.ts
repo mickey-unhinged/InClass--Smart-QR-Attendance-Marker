@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { requestNotificationPermission, subscribeToPushNotifications, unsubscribeFromPushNotifications } from '@/lib/pushNotifications';
+import { requestNotificationPermission } from '@/lib/notifications';
+import { subscribeToPushNotifications, unsubscribeFromPushNotifications } from '@/lib/pushNotifications';
 
 export const usePushNotifications = () => {
   const { user } = useAuth();

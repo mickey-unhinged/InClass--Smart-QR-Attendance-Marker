@@ -16,33 +16,45 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
   return false;
 };
 
-export const sendNotification = async (title: string, options?: NotificationOptions) => {
-  if (Notification.permission !== 'granted') {
-    console.warn('Notification permission not granted');
-    return;
-  }
+// Internal helper to verify notification capability and get a ready registration
+const canNotify = async (): Promise<{
+  ok: boolean;
+  reason?: string;
+  registration?: ServiceWorkerRegistration;
+}> => {
+  if (!('Notification' in window)) return { ok: false, reason: 'no_notification_api' };
+  if (Notification.permission !== 'granted') return { ok: false, reason: 'permission_not_granted' };
+  if (!('serviceWorker' in navigator)) return { ok: false, reason: 'no_service_worker' };
 
-  if (!('serviceWorker' in navigator)) {
-    console.warn('Service worker not supported in this browser');
+  try {
+    const registration = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('sw_timeout')), 3000)),
+    ]);
+    if (typeof registration.showNotification !== 'function') {
+      return { ok: false, reason: 'showNotification_missing' };
+    }
+    return { ok: true, registration };
+  } catch (e) {
+    return { ok: false, reason: 'sw_not_ready' };
+  }
+};
+
+export const sendNotification = async (title: string, options?: NotificationOptions) => {
+  const capability = await canNotify();
+  if (!capability.ok || !capability.registration) {
+    console.warn('Cannot send notification:', capability.reason);
     return;
   }
 
   try {
-    // Wait for service worker to be ready with a timeout
-    const registration = await Promise.race([
-      navigator.serviceWorker.ready,
-      new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Service worker timeout')), 3000)
-      )
-    ]);
-
-    await registration.showNotification(title, {
+    await capability.registration.showNotification(title, {
       icon: '/favicon.ico',
       badge: '/favicon.ico',
       ...options,
     });
   } catch (error) {
-    console.warn('Service worker not ready; skipping notification:', error);
+    console.warn('showNotification failed:', error);
   }
 };
 
