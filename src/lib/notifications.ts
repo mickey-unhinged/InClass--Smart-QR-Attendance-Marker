@@ -22,25 +22,27 @@ export const sendNotification = async (title: string, options?: NotificationOpti
     return;
   }
 
+  if (!('serviceWorker' in navigator)) {
+    console.warn('Service worker not supported in this browser');
+    return;
+  }
+
   try {
-    // Use service worker registration if available (required for PWA)
-    if ('serviceWorker' in navigator) {
-      const registration = await navigator.serviceWorker.ready;
-      await registration.showNotification(title, {
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        ...options,
-      });
-    } else {
-      // Fallback for browsers without service worker support
-      new Notification(title, {
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        ...options,
-      });
-    }
+    // Wait for service worker to be ready with a timeout
+    const registration = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Service worker timeout')), 3000)
+      )
+    ]);
+
+    await registration.showNotification(title, {
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
+      ...options,
+    });
   } catch (error) {
-    console.error('Failed to send notification:', error);
+    console.warn('Service worker not ready; skipping notification:', error);
   }
 };
 
