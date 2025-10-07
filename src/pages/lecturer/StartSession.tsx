@@ -28,6 +28,7 @@ export default function StartSession() {
   const [classData, setClassData] = useState<Class | null>(null);
   const [duration, setDuration] = useState('10');
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
   const [locationRequired, setLocationRequired] = useState(false);
   const [latitude, setLatitude] = useState<number | undefined>();
   const [longitude, setLongitude] = useState<number | undefined>();
@@ -59,7 +60,9 @@ export default function StartSession() {
     if (template) {
       setDuration(template.duration_minutes.toString());
       setLocationRequired(template.location_required);
-      setGeofenceRadius(template.grace_period_minutes || 100);
+      // Extract geofence radius from template settings if available
+      const templateRadius = template.settings?.geofence_radius_meters || 100;
+      setGeofenceRadius(templateRadius);
     }
   };
 
@@ -91,30 +94,48 @@ export default function StartSession() {
   const handleStartSession = async () => {
     if (!classData || !user) return;
 
+    // Validate location when required
+    if (locationRequired && (latitude === undefined || longitude === undefined)) {
+      toast({
+        title: 'Location Required',
+        description: 'Please set the classroom location before starting the session',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setCreating(true);
     try {
       const sessionCode = generateSessionCode();
       const durationMinutes = parseInt(duration);
       const endTime = new Date(Date.now() + durationMinutes * 60 * 1000);
 
+      const sessionData = {
+        class_id: classData.id,
+        lecturer_id: user.id,
+        session_code: sessionCode,
+        end_time: endTime.toISOString(),
+        duration_minutes: durationMinutes,
+        is_active: true,
+        location_required: locationRequired,
+        classroom_latitude: latitude,
+        classroom_longitude: longitude,
+        geofence_radius_meters: geofenceRadius,
+        template_id: selectedTemplate || null,
+      };
+
+      console.info('Creating attendance session:', sessionData);
+
       const { data, error } = await supabase
         .from('attendance_sessions')
-        .insert({
-          class_id: classData.id,
-          lecturer_id: user.id,
-          session_code: sessionCode,
-          end_time: endTime.toISOString(),
-          duration_minutes: durationMinutes,
-          is_active: true,
-          location_required: locationRequired,
-          classroom_latitude: latitude,
-          classroom_longitude: longitude,
-          geofence_radius_meters: geofenceRadius,
-          template_id: selectedTemplate || null,
-        })
+        .insert(sessionData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Session creation error:', { error, sessionData });
+        throw error;
+      }
 
       toast({
         title: 'Session Started',
@@ -123,11 +144,14 @@ export default function StartSession() {
 
       navigate(`/lecturer/active-session/${data.id}`);
     } catch (error: any) {
+      console.error('Session creation exception:', error);
       toast({
-        title: 'Error',
-        description: error.message,
+        title: 'Error Creating Session',
+        description: error.message || 'Failed to create attendance session',
         variant: 'destructive',
       });
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -255,10 +279,20 @@ export default function StartSession() {
               </div>
             </div>
 
-            <Button onClick={handleStartSession} className="w-full" size="lg">
+            <Button 
+              onClick={handleStartSession} 
+              className="w-full" 
+              size="lg"
+              disabled={creating || (locationRequired && (latitude === undefined || longitude === undefined))}
+            >
               <QrCode className="w-5 h-5 mr-2" />
-              Generate QR Code & Start Session
+              {creating ? 'Starting Session...' : 'Generate QR Code & Start Session'}
             </Button>
+            {locationRequired && (latitude === undefined || longitude === undefined) && (
+              <p className="text-sm text-destructive text-center">
+                Please set the classroom location to continue
+              </p>
+            )}
           </CardContent>
         </Card>
       </main>
