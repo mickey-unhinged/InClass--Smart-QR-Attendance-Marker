@@ -32,24 +32,13 @@ export default function AnnouncementsInbox() {
     if (user) {
       fetchAnnouncements();
       
-      // Subscribe to real-time updates for both inserts and updates
+      // Subscribe to real-time updates
       const channel = supabase
         .channel('announcements-changes')
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
-            schema: 'public',
-            table: 'class_announcements'
-          },
-          () => {
-            fetchAnnouncements();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
             schema: 'public',
             table: 'class_announcements'
           },
