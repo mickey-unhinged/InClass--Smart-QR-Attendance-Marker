@@ -1,6 +1,6 @@
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface GeofenceRadiusControlProps {
   radius: number;
@@ -19,18 +19,12 @@ export default function GeofenceRadiusControl({ radius, onRadiusChange }: Geofen
           <div className="flex justify-between">
             <Label>Radius: {radius}m</Label>
             <span className="text-sm text-muted-foreground">
-              {radius < 100 ? 'Very Strict' : radius < 200 ? 'Strict' : radius < 300 ? 'Moderate' : 'Lenient'}
+              {radius < 100 ? "Very Strict" : radius < 200 ? "Strict" : radius < 300 ? "Moderate" : "Lenient"}
             </span>
           </div>
-          <Slider
-            value={[radius]}
-            onValueChange={(values) => onRadiusChange(values[0])}
-            min={50}
-            max={500}
-            step={10}
-          />
+          <Slider value={[radius]} onValueChange={(values) => onRadiusChange(values[0])} min={10} max={500} step={10} />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>50m</span>
+            <span>10m</span>
             <span>500m</span>
           </div>
         </div>
