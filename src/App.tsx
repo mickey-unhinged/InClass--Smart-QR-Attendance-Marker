@@ -24,7 +24,6 @@ import AttendanceHistory from "./pages/student/AttendanceHistory";
 import StudentSettings from "./pages/student/Settings";
 import AttendanceInsights from "./pages/student/AttendanceInsights";
 import Badges from "./pages/student/Badges";
-import StudyGroups from "./pages/student/StudyGroups";
 import SessionTemplates from "./pages/lecturer/SessionTemplates";
 import AttendanceManagement from "./pages/lecturer/AttendanceManagement";
 import ClassAnnouncements from "./pages/lecturer/ClassAnnouncements";
@@ -187,14 +186,6 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="student">
                   <Badges />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/student/study-groups" 
-              element={
-                <ProtectedRoute requiredRole="student">
-                  <StudyGroups />
                 </ProtectedRoute>
               } 
             />

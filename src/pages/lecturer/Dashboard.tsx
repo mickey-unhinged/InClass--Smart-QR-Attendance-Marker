@@ -107,36 +107,13 @@ export default function LecturerDashboard() {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      // Calculate average attendance across all sessions
-      const { data: allSessions } = await supabase
-        .from('attendance_sessions')
-        .select('id, class_id')
-        .eq('lecturer_id', user.id)
-        .eq('is_active', false);
+      // Calculate average attendance using optimized database function
+      const { data: avgAttendanceData } = await supabase
+        .rpc('calculate_lecturer_avg_attendance', {
+          lecturer_uuid: user.id
+        });
 
-      let totalAttendanceRate = 0;
-      let sessionCount = 0;
-
-      if (allSessions && classes) {
-        for (const session of allSessions) {
-          const { count: attendees } = await supabase
-            .from('attendance_records')
-            .select('*', { count: 'exact', head: true })
-            .eq('session_id', session.id);
-
-          const { count: enrolled } = await supabase
-            .from('student_enrollments')
-            .select('*', { count: 'exact', head: true })
-            .eq('class_id', session.class_id);
-
-          if (enrolled && enrolled > 0) {
-            totalAttendanceRate += ((attendees || 0) / enrolled) * 100;
-            sessionCount++;
-          }
-        }
-      }
-
-      const avgAttendance = sessionCount > 0 ? Math.round(totalAttendanceRate / sessionCount) : 0;
+      const avgAttendance = avgAttendanceData ? Math.round(avgAttendanceData) : 0;
 
       setStats({
         totalClasses: totalClasses || 0,

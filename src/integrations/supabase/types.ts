@@ -1385,6 +1385,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_lecturer_avg_attendance: {
+        Args: { lecturer_uuid: string }
+        Returns: number
+      }
       deactivate_expired_sessions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1398,6 +1402,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_group_creator: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_group_member: {
+        Args: { _group_id: string; _user_id: string }
         Returns: boolean
       }
     }

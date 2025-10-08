@@ -198,10 +198,6 @@ export default function StudentDashboard() {
                 <Award className="w-4 h-4 mr-2" />
                 Achievement Badges
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/student/study-groups')}>
-                <Users className="w-4 h-4 mr-2" />
-                Study Groups
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/student/settings')}>
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
@@ -252,7 +248,7 @@ export default function StudentDashboard() {
           </Card>
 
           {/* New Features Highlights */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Card 
               className="cursor-pointer hover:border-primary/50 transition-colors"
               onClick={() => navigate('/student/insights')}
@@ -276,19 +272,6 @@ export default function StudentDashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-muted-foreground">Unlock badges and earn rewards</p>
-              </CardContent>
-            </Card>
-
-            <Card 
-              className="cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => navigate('/student/study-groups')}
-            >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Study Groups</CardTitle>
-                <Users className="h-5 w-5 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">Join or create study groups</p>
               </CardContent>
             </Card>
           </div>
