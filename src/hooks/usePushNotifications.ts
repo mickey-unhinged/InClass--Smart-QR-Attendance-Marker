@@ -8,20 +8,30 @@ export const usePushNotifications = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    if ('Notification' in window) {
-      setPermission(Notification.permission);
+    try {
+      if (typeof Notification !== 'undefined' && 'Notification' in window) {
+        setPermission(Notification.permission);
+      }
+    } catch (error) {
+      console.warn('Notification API not available:', error);
     }
   }, []);
 
   const subscribe = async () => {
     if (!user) return;
     
-    const granted = await requestNotificationPermission();
-    setPermission(Notification.permission);
-    
-    if (granted) {
-      await subscribeToPushNotifications(user.id);
-      setIsSubscribed(true);
+    try {
+      const granted = await requestNotificationPermission();
+      if (typeof Notification !== 'undefined') {
+        setPermission(Notification.permission);
+      }
+      
+      if (granted) {
+        await subscribeToPushNotifications(user.id);
+        setIsSubscribed(true);
+      }
+    } catch (error) {
+      console.warn('Error subscribing to notifications:', error);
     }
   };
 

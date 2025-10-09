@@ -37,17 +37,21 @@ export default function SessionNotifications() {
             const classInfo = enrollment.classes as any;
             const courseName = `${classInfo.course_code} - ${classInfo.course_name}`;
             
-            // Show browser notification
-            if (Notification.permission === 'granted') {
-              new Notification('Attendance Session Active! 🎓', {
-                body: `${courseName} - Scan now to mark attendance`,
-                icon: '/favicon.ico',
-                tag: 'session-active',
-                requireInteraction: true,
-              });
+            // Show browser notification (if available)
+            try {
+              if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                new Notification('Attendance Session Active! 🎓', {
+                  body: `${courseName} - Scan now to mark attendance`,
+                  icon: '/favicon.ico',
+                  tag: 'session-active',
+                  requireInteraction: true,
+                });
+              }
+            } catch (error) {
+              console.warn('Browser notifications not available:', error);
             }
 
-            // Show toast notification
+            // Show toast notification (always works)
             toast({
               title: 'New Session Active!',
               description: `${courseName} - Scan QR code now`,
@@ -99,13 +103,17 @@ export default function SessionNotifications() {
               const classInfo = enrollment.classes as any;
               const courseName = `${classInfo.course_code} - ${classInfo.course_name}`;
               
-              // Show notification for missed class
-              if (Notification.permission === 'granted') {
-                new Notification('Missed Class Alert', {
-                  body: `You missed: ${courseName}`,
-                  icon: '/favicon.ico',
-                  tag: 'missed-class',
-                });
+              // Show notification for missed class (if available)
+              try {
+                if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                  new Notification('Missed Class Alert', {
+                    body: `You missed: ${courseName}`,
+                    icon: '/favicon.ico',
+                    tag: 'missed-class',
+                  });
+                }
+              } catch (error) {
+                console.warn('Browser notifications not available:', error);
               }
 
               toast({
