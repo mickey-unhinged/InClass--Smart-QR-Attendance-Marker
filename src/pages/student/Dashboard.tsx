@@ -8,6 +8,10 @@ import { supabase } from '@/integrations/supabase/client';
 import BrowseClasses from './BrowseClasses';
 import SessionNotifications from '@/components/SessionNotifications';
 import AnnouncementsInbox from '@/components/AnnouncementsInbox';
+import { EmailVerificationBanner } from '@/components/EmailVerificationBanner';
+import { AttendanceGoals } from '@/components/AttendanceGoals';
+import { ActivityFeed } from '@/components/ActivityFeed';
+import { QuickActions } from '@/components/QuickActions';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -214,6 +218,8 @@ export default function StudentDashboard() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-8">
+          <EmailVerificationBanner />
+          
           {/* Welcome Section */}
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
@@ -358,6 +364,15 @@ export default function StudentDashboard() {
               </CardContent>
             </Card>
           )}
+
+          {/* Quick Actions */}
+          <QuickActions />
+
+          {/* Attendance Goals & Activity */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <AttendanceGoals />
+            <ActivityFeed />
+          </div>
 
           {/* Announcements Inbox */}
           <AnnouncementsInbox />

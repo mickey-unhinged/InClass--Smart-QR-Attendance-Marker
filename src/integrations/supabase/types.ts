@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          activity_description: string
+          activity_type: string
+          created_at: string | null
+          id: string
+          related_id: string | null
+          related_type: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_description: string
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          related_id?: string | null
+          related_type?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_description?: string
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          related_id?: string | null
+          related_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       attendance_adjustments: {
         Row: {
           adjusted_at: string | null
@@ -142,6 +172,53 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_goals: {
+        Row: {
+          achieved: boolean | null
+          achieved_at: string | null
+          class_id: string | null
+          created_at: string | null
+          end_date: string | null
+          goal_type: string
+          id: string
+          start_date: string
+          student_id: string
+          target_percentage: number
+        }
+        Insert: {
+          achieved?: boolean | null
+          achieved_at?: string | null
+          class_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          goal_type: string
+          id?: string
+          start_date?: string
+          student_id: string
+          target_percentage: number
+        }
+        Update: {
+          achieved?: boolean | null
+          achieved_at?: string | null
+          class_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          goal_type?: string
+          id?: string
+          start_date?: string
+          student_id?: string
+          target_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_goals_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
             referencedColumns: ["id"]
           },
         ]
@@ -412,7 +489,7 @@ export type Database = {
           action: string
           changes: Json | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           resource_id: string | null
           resource_type: string
           timestamp: string | null
@@ -423,7 +500,7 @@ export type Database = {
           action: string
           changes?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           resource_id?: string | null
           resource_type: string
           timestamp?: string | null
@@ -434,7 +511,7 @@ export type Database = {
           action?: string
           changes?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           resource_id?: string | null
           resource_type?: string
           timestamp?: string | null
@@ -582,6 +659,8 @@ export type Database = {
       classes: {
         Row: {
           academic_year: string
+          archived: boolean | null
+          archived_at: string | null
           capacity: number | null
           course_code: string
           course_name: string
@@ -597,6 +676,8 @@ export type Database = {
         }
         Insert: {
           academic_year: string
+          archived?: boolean | null
+          archived_at?: string | null
           capacity?: number | null
           course_code: string
           course_name: string
@@ -612,6 +693,8 @@ export type Database = {
         }
         Update: {
           academic_year?: string
+          archived?: boolean | null
+          archived_at?: string | null
           capacity?: number | null
           course_code?: string
           course_name?: string
@@ -813,6 +896,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string | null
           email: string
           full_name: string | null
@@ -820,6 +904,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string | null
           email: string
           full_name?: string | null
@@ -827,6 +912,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string | null
           email?: string
           full_name?: string | null
@@ -1239,7 +1325,7 @@ export type Database = {
           id: string
           metric_date: string
           recorded_at: string | null
-          system_uptime: unknown | null
+          system_uptime: unknown
           total_scans_today: number | null
           total_sessions: number | null
           total_users: number | null
@@ -1252,7 +1338,7 @@ export type Database = {
           id?: string
           metric_date: string
           recorded_at?: string | null
-          system_uptime?: unknown | null
+          system_uptime?: unknown
           total_scans_today?: number | null
           total_sessions?: number | null
           total_users?: number | null
@@ -1265,7 +1351,7 @@ export type Database = {
           id?: string
           metric_date?: string
           recorded_at?: string | null
-          system_uptime?: unknown | null
+          system_uptime?: unknown
           total_scans_today?: number | null
           total_sessions?: number | null
           total_users?: number | null
@@ -1382,17 +1468,34 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      student_leaderboard: {
+        Row: {
+          avatar_url: string | null
+          badge_count: number | null
+          full_name: string | null
+          global_rank: number | null
+          level: number | null
+          points: number | null
+          rank: string | null
+          student_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gamification_points_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       calculate_lecturer_avg_attendance: {
         Args: { lecturer_uuid: string }
         Returns: number
       }
-      deactivate_expired_sessions: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      deactivate_expired_sessions: { Args: never; Returns: undefined }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

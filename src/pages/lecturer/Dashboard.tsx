@@ -5,6 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BookOpen, History, FileText, BarChart3, LogOut, Users, TrendingUp, AlertCircle, Plus, GraduationCap, Menu, QrCode, Settings, Layout, UserCog, Megaphone, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { EmailVerificationBanner } from '@/components/EmailVerificationBanner';
+import { ActivityFeed } from '@/components/ActivityFeed';
+import { QuickActions } from '@/components/QuickActions';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -267,6 +270,8 @@ export default function LecturerDashboard() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-8">
+          <EmailVerificationBanner />
+          
           {/* Welcome Section */}
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
@@ -402,7 +407,13 @@ export default function LecturerDashboard() {
             </Card>
           )}
 
-          {/* Quick Actions */}
+          {/* Quick Actions & Activity */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <QuickActions />
+            <ActivityFeed />
+          </div>
+
+          {/* Quick Actions Legacy */}
           <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

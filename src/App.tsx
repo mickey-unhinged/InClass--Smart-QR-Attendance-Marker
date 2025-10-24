@@ -24,6 +24,7 @@ import AttendanceHistory from "./pages/student/AttendanceHistory";
 import StudentSettings from "./pages/student/Settings";
 import AttendanceInsights from "./pages/student/AttendanceInsights";
 import Badges from "./pages/student/Badges";
+import StudentLeaderboard from "./pages/student/Leaderboard";
 import SessionTemplates from "./pages/lecturer/SessionTemplates";
 import AttendanceManagement from "./pages/lecturer/AttendanceManagement";
 import ClassAnnouncements from "./pages/lecturer/ClassAnnouncements";
@@ -48,6 +49,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/landing" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/about" element={<About />} />
             
             {/* Lecturer Routes */}
             <Route 
@@ -88,6 +91,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="lecturer">
                   <SessionHistory />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/lecturer/leaderboard" 
+              element={
+                <ProtectedRoute requiredRole="lecturer">
+                  <LecturerLeaderboard />
                 </ProtectedRoute>
               } 
             />
@@ -186,6 +197,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="student">
                   <Badges />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student/leaderboard" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudentLeaderboard />
                 </ProtectedRoute>
               } 
             />
