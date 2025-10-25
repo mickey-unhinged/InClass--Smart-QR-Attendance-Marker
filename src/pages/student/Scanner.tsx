@@ -245,7 +245,7 @@ export default function Scanner() {
         return;
       }
 
-      // Success!
+      // Success! Now update patterns and check badges
       setSessionInfo(session);
       setSuccess(true);
       setScanning(false);
@@ -254,6 +254,15 @@ export default function Scanner() {
         title: 'Attendance Marked!',
         description: `Successfully marked for ${session.classes.course_code}`,
       });
+
+      // Trigger pattern update and badge checking (don't await, let it run in background)
+      supabase.functions.invoke('update-attendance-patterns', {
+        body: {
+          studentId: user.id,
+          classId: session.class_id,
+          sessionId: session.id,
+        },
+      }).catch(err => console.error('Pattern update failed:', err));
     } catch (error: any) {
       toast({
         title: 'Error',
