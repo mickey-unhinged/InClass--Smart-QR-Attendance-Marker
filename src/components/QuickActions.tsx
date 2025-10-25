@@ -58,7 +58,7 @@ export function QuickActions() {
       icon: <FileSpreadsheet className="h-5 w-5" />,
       label: 'Session Templates',
       description: 'Manage session templates',
-      action: () => navigate('/lecturer/session-templates'),
+      action: () => navigate('/lecturer/templates'),
       variant: 'outline' as const,
     },
     {

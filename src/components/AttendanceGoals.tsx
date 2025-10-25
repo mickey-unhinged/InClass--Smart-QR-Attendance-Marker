@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,7 @@ interface Goal {
 export function AttendanceGoals() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [currentPercentage, setCurrentPercentage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -135,7 +137,11 @@ export function AttendanceGoals() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="outline" className="w-full">
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => navigate('/student/settings')}
+          >
             <Target className="h-4 w-4 mr-2" />
             Set Your First Goal
           </Button>
