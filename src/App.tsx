@@ -32,6 +32,11 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminUserManagement from "./pages/admin/UserManagement";
 import NotFound from "./pages/NotFound";
 import OfflineIndicator from "./components/OfflineIndicator";
+import ForgotPassword from "./pages/ForgotPassword";
+import About from "./pages/About";
+import LecturerLeaderboard from "./pages/lecturer/Leaderboard";
+import StudyGroups from "./pages/student/StudyGroups";
+import BrowseClasses from "./pages/student/BrowseClasses";
 
 const queryClient = new QueryClient();
 
