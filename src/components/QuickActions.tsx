@@ -30,7 +30,7 @@ export function QuickActions() {
       icon: <PlayCircle className="h-5 w-5" />,
       label: 'Start Session',
       description: 'Begin a new attendance session',
-      action: () => navigate('/lecturer/start-session'),
+      action: () => navigate('/lecturer/classes'),
       variant: 'default' as const,
     },
     {
