@@ -44,6 +44,109 @@ export type Database = {
         }
         Relationships: []
       }
+      assignment_submissions: {
+        Row: {
+          assignment_id: string
+          auto_submitted: boolean | null
+          content: string | null
+          feedback: string | null
+          id: string
+          is_late: boolean | null
+          score: number | null
+          student_id: string
+          submission_file_url: string | null
+          submitted_at: string | null
+        }
+        Insert: {
+          assignment_id: string
+          auto_submitted?: boolean | null
+          content?: string | null
+          feedback?: string | null
+          id?: string
+          is_late?: boolean | null
+          score?: number | null
+          student_id: string
+          submission_file_url?: string | null
+          submitted_at?: string | null
+        }
+        Update: {
+          assignment_id?: string
+          auto_submitted?: boolean | null
+          content?: string | null
+          feedback?: string | null
+          id?: string
+          is_late?: boolean | null
+          score?: number | null
+          student_id?: string
+          submission_file_url?: string | null
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignments: {
+        Row: {
+          assignment_type: Database["public"]["Enums"]["assignment_type"]
+          class_id: string
+          created_at: string | null
+          created_by: string
+          description: string | null
+          due_date: string
+          duration_minutes: number | null
+          file_url: string | null
+          go_live_date: string
+          id: string
+          max_score: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assignment_type?: Database["public"]["Enums"]["assignment_type"]
+          class_id: string
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          due_date: string
+          duration_minutes?: number | null
+          file_url?: string | null
+          go_live_date: string
+          id?: string
+          max_score?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assignment_type?: Database["public"]["Enums"]["assignment_type"]
+          class_id?: string
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          due_date?: string
+          duration_minutes?: number | null
+          file_url?: string | null
+          go_live_date?: string
+          id?: string
+          max_score?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_adjustments: {
         Row: {
           adjusted_at: string | null
@@ -1518,6 +1621,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "lecturer" | "student"
+      assignment_type: "assignment" | "cat"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1646,6 +1750,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "lecturer", "student"],
+      assignment_type: ["assignment", "cat"],
     },
   },
 } as const
