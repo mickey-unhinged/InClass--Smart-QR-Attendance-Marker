@@ -35,9 +35,9 @@ export function QuickActions() {
     },
     {
       icon: <FileText className="h-5 w-5" />,
-      label: 'View Reports',
-      description: 'Access attendance reports',
-      action: () => navigate('/lecturer/reports'),
+      label: 'Assignments',
+      description: 'Create and grade assignments',
+      action: () => navigate('/lecturer/assignments'),
       variant: 'outline' as const,
     },
     {
@@ -79,6 +79,13 @@ export function QuickActions() {
       variant: 'default' as const,
     },
     {
+      icon: <FileText className="h-5 w-5" />,
+      label: 'Assignments',
+      description: 'View and submit work',
+      action: () => navigate('/student/assignments'),
+      variant: 'outline' as const,
+    },
+    {
       icon: <Eye className="h-5 w-5" />,
       label: 'View Attendance',
       description: 'Check your attendance records',
@@ -104,13 +111,6 @@ export function QuickActions() {
       label: 'Leaderboard',
       description: 'See your ranking',
       action: () => navigate('/student/leaderboard'),
-      variant: 'outline' as const,
-    },
-    {
-      icon: <BarChart3 className="h-5 w-5" />,
-      label: 'Insights',
-      description: 'View attendance insights',
-      action: () => navigate('/student/insights'),
       variant: 'outline' as const,
     },
   ];

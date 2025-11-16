@@ -37,6 +37,8 @@ import About from "./pages/About";
 import LecturerLeaderboard from "./pages/lecturer/Leaderboard";
 import StudyGroups from "./pages/student/StudyGroups";
 import BrowseClasses from "./pages/student/BrowseClasses";
+import LecturerAssignments from "./pages/lecturer/Assignments";
+import StudentAssignments from "./pages/student/Assignments";
 
 const queryClient = new QueryClient();
 
@@ -155,6 +157,14 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/lecturer/assignments" 
+              element={
+                <ProtectedRoute requiredRole="lecturer">
+                  <LecturerAssignments />
+                </ProtectedRoute>
+              } 
+            />
             
             {/* Student Routes */}
             <Route 
@@ -210,6 +220,30 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="student">
                   <StudentLeaderboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student/study-groups" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudyGroups />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student/browse-classes" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <BrowseClasses />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student/assignments" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudentAssignments />
                 </ProtectedRoute>
               } 
             />
