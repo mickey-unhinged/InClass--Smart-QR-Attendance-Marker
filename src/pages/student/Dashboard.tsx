@@ -12,6 +12,7 @@ import { EmailVerificationBanner } from '@/components/EmailVerificationBanner';
 import { AttendanceGoals } from '@/components/AttendanceGoals';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { QuickActions } from '@/components/QuickActions';
+import { AIAssistant } from '@/components/AIAssistant';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -381,6 +382,7 @@ export default function StudentDashboard() {
           <BrowseClasses />
         </div>
       </main>
+      <AIAssistant />
     </div>
   );
 }
