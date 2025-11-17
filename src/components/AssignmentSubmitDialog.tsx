@@ -6,6 +6,23 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
+import { z } from 'zod';
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const ALLOWED_FILE_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain',
+  'image/jpeg',
+  'image/png',
+];
+
+const submissionSchema = z.object({
+  content: z.string().max(5000, 'Notes must be less than 5000 characters'),
+});
 
 interface AssignmentSubmitDialogProps {
   assignment: any;
@@ -18,7 +35,36 @@ export function AssignmentSubmitDialog({ assignment, trigger }: AssignmentSubmit
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    
+    if (selectedFile) {
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        toast.error('File size must be less than 50MB');
+        e.target.value = '';
+        setFile(null);
+        return;
+      }
+      
+      if (!ALLOWED_FILE_TYPES.includes(selectedFile.type)) {
+        toast.error('Invalid file type. Allowed: PDF, Word, Excel, Text, Images');
+        e.target.value = '';
+        setFile(null);
+        return;
+      }
+    }
+    
+    setFile(selectedFile);
+  };
+
   const handleSubmit = async () => {
+    // Validate content
+    const result = submissionSchema.safeParse({ content });
+    if (!result.success) {
+      toast.error(result.error.errors[0].message);
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -46,7 +92,7 @@ export function AssignmentSubmitDialog({ assignment, trigger }: AssignmentSubmit
         assignment_id: assignment.id,
         student_id: user.id,
         submission_file_url: fileUrl,
-        content: content || null,
+        content: content.trim() || null,
         is_late: new Date() > new Date(assignment.due_date),
       });
 
@@ -80,14 +126,15 @@ export function AssignmentSubmitDialog({ assignment, trigger }: AssignmentSubmit
                 <div className="flex flex-col items-center space-y-2">
                   <Upload className="w-6 h-6 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    {file ? file.name : 'Click to upload file'}
+                    {file ? file.name : 'Click to upload (PDF, Word, Excel, Images - Max 50MB)'}
                   </span>
                 </div>
                 <input
                   id="file"
                   type="file"
                   className="hidden"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  onChange={handleFileChange}
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png"
                 />
               </label>
             </div>
@@ -101,7 +148,11 @@ export function AssignmentSubmitDialog({ assignment, trigger }: AssignmentSubmit
               onChange={(e) => setContent(e.target.value)}
               rows={4}
               placeholder="Add any notes or comments..."
+              maxLength={5000}
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              {content.length} / 5000 characters
+            </p>
           </div>
 
           <Button

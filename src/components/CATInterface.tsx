@@ -6,6 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { AlertCircle, Clock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { z } from 'zod';
+
+const catSubmissionSchema = z.object({
+  content: z.string().trim().max(50000, 'Content must be less than 50000 characters'),
+});
 
 interface CATInterfaceProps {
   assignment: any;
@@ -46,6 +51,14 @@ export function CATInterface({ assignment, onComplete }: CATInterfaceProps) {
 
   const handleSubmit = async (isAutoSubmit = false) => {
     if (submitting || autoSubmitting) return;
+    
+    // Validate content
+    const result = catSubmissionSchema.safeParse({ content });
+    if (!result.success) {
+      toast.error(result.error.errors[0].message);
+      return;
+    }
+    
     setSubmitting(true);
 
     try {
@@ -55,7 +68,7 @@ export function CATInterface({ assignment, onComplete }: CATInterfaceProps) {
       const { error } = await supabase.from('assignment_submissions').insert({
         assignment_id: assignment.id,
         student_id: user.id,
-        content,
+        content: content.trim(),
         auto_submitted: isAutoSubmit,
         is_late: new Date() > new Date(assignment.due_date),
       });
@@ -119,7 +132,11 @@ export function CATInterface({ assignment, onComplete }: CATInterfaceProps) {
               rows={15}
               className="font-mono"
               disabled={autoSubmitting}
+              maxLength={50000}
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              {content.length} / 50000 characters
+            </p>
           </div>
 
           <div className="flex gap-2">
