@@ -147,6 +147,36 @@ export default function Scanner() {
       // Generate device fingerprint for fraud prevention
       const deviceFingerprint = await getStableDeviceFingerprint();
 
+      // Server-side device validation (max 2 devices per student)
+      const { count: deviceCount, error: deviceCountError } = await supabase
+        .from('device_fingerprints')
+        .select('*', { count: 'exact', head: true })
+        .eq('student_id', user.id);
+
+      if (deviceCountError) {
+        console.error('Error checking device count:', deviceCountError);
+      }
+
+      if (deviceCount && deviceCount >= 2) {
+        // Check if this is one of the approved devices
+        const { data: existingDevice } = await supabase
+          .from('device_fingerprints')
+          .select('fingerprint')
+          .eq('student_id', user.id)
+          .eq('fingerprint', deviceFingerprint)
+          .maybeSingle();
+
+        if (!existingDevice) {
+          toast({
+            title: 'Device Limit Reached',
+            description: 'You have already registered 2 devices. Please contact your lecturer for approval to add a new device.',
+            variant: 'destructive',
+          });
+          setScanning(false);
+          return;
+        }
+      }
+
       // Handle location verification if required
       let locationData: any = {};
       if (session.location_required && session.classroom_latitude && session.classroom_longitude) {
@@ -245,7 +275,17 @@ export default function Scanner() {
         return;
       }
 
-      // Success! Now update patterns and check badges
+      // Success! Now record device and update patterns
+      // Record device fingerprint server-side
+      const { error: deviceError } = await supabase.rpc('upsert_device_fingerprint', {
+        p_student_id: user.id,
+        p_fingerprint: deviceFingerprint,
+      });
+
+      if (deviceError) {
+        console.error('Failed to record device fingerprint:', deviceError);
+      }
+
       setSessionInfo(session);
       setSuccess(true);
       setScanning(false);
