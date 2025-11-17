@@ -6,25 +6,25 @@ InClass is a comprehensive Progressive Web App (PWA) designed to revolutionize u
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/476cf355-46d5-47c2-a2ca-0903f0ab1a53
+**URL**: https://inclass-rtl.lovable.app
 
 ## 🎯 Features
 
-### Phase 1-2: Core Functionality
+### Core Functionality
 
 - ✅ **Role-Based Authentication**: Separate interfaces for lecturers and students
 - ✅ **QR Code Generation**: Time-limited, secure QR codes for each class session
 - ✅ **Real-time Scanning**: Instant QR code scanning with immediate confirmation
 - ✅ **Session Management**: Start/stop attendance sessions with customizable durations
 
-### Phase 4-5: History & Reports
+### History & Reports
 
 - ✅ **Attendance History**: Complete attendance records with statistics
 - ✅ **Report Generation**: Export data as PDF and CSV
 - ✅ **Student Analytics**: Visual charts showing attendance patterns
 - ✅ **Session History**: Detailed view of past sessions with attendee counts
 
-### Phase 6-7: Security & Notifications
+### Security & Notifications
 
 - ✅ **Fraud Prevention**: Screenshot detection and duplicate scan prevention
 - ✅ **Device Fingerprinting**: Track and limit scanning devices
@@ -32,7 +32,7 @@ InClass is a comprehensive Progressive Web App (PWA) designed to revolutionize u
 - ✅ **Browser Notifications**: Real-time alerts for active sessions
 - ✅ **Security Monitoring**: Anti-fraud measures and session security
 
-### Phase 8-9: Analytics & Polish
+### Analytics & Polish
 
 - ✅ **Advanced Analytics**: Detailed insights into attendance trends
 - ✅ **Peak Hours Analysis**: Identify optimal class times
@@ -44,7 +44,7 @@ InClass is a comprehensive Progressive Web App (PWA) designed to revolutionize u
 
 - **Frontend**: React 18+ with TypeScript
 - **Styling**: Tailwind CSS with custom design system
-- **Build Tool**: Vite
+- **Build Tool**: Vite & capacitor
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
 - **Real-time**: Supabase real-time subscriptions
@@ -63,7 +63,7 @@ InClass is a comprehensive Progressive Web App (PWA) designed to revolutionize u
 
 ```sh
 # Step 1: Clone the repository
-git clone <YOUR_GIT_URL>
+git clone [https://github.com/mickey-unhinged/inclass-your-buddy.git]
 
 # Step 2: Navigate to the project directory
 cd <YOUR_PROJECT_NAME>
@@ -150,6 +150,7 @@ Enable browser notifications for:
 - Active session alerts
 - Attendance reminders
 - Low attendance warnings
+- Assignment reminders
 
 ### Location Services
 
@@ -158,16 +159,6 @@ Configure GPS verification:
 - Classroom location setup
 - Verification radius (default: 100m)
 - Override permissions for special cases
-
-## 📈 Deployment
-
-Simply open [Lovable](https://lovable.dev/projects/476cf355-46d5-47c2-a2ca-0903f0ab1a53) and click on Share → Publish.
-
-### Custom Domain
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
 
 ## 🎓 Perfect For
 
@@ -184,5 +175,3 @@ MIT License - See LICENSE file for details
 ---
 
 **InClass** - Transforming attendance tracking for modern education 🎓
-
-//Built with [Lovable](https://lovable.dev) - the AI-powered full-stack development platform.
