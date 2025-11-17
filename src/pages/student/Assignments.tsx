@@ -41,7 +41,7 @@ export default function Assignments() {
             .select('*')
             .eq('assignment_id', assignment.id)
             .eq('student_id', user.id)
-            .single();
+            .maybeSingle();
 
           return { ...assignment, submission };
         })
