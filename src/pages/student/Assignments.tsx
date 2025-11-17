@@ -4,15 +4,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Clock, Download, Upload as UploadIcon, CheckCircle } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { FileText, Clock, Download, Upload as UploadIcon, CheckCircle, Home } from 'lucide-react';
+import { format, formatDistanceToNow } from 'date-fns';
 import { CATInterface } from '@/components/CATInterface';
 import { AssignmentSubmitDialog } from '@/components/AssignmentSubmitDialog';
+import { useNavigate } from 'react-router-dom';
 
 export default function Assignments() {
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
   const [takingCAT, setTakingCAT] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const { data: assignments } = useQuery({
     queryKey: ['student-assignments'],
@@ -65,9 +66,18 @@ export default function Assignments() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Assignments</h1>
-        <p className="text-muted-foreground">View and complete your assignments</p>
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/student/dashboard')}
+        >
+          <Home className="h-5 w-5" />
+        </Button>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold">Assignments</h1>
+          <p className="text-muted-foreground">View and complete your assignments</p>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -100,9 +110,14 @@ export default function Assignments() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    Due: {formatDistanceToNow(new Date(assignment.due_date), { addSuffix: true })}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">
+                      Due: {format(new Date(assignment.due_date), 'PPp')}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      ({formatDistanceToNow(new Date(assignment.due_date), { addSuffix: true })})
+                    </span>
+                  </div>
                 </div>
                 {assignment.assignment_type === 'cat' && assignment.duration_minutes && (
                   <div className="flex items-center gap-2">

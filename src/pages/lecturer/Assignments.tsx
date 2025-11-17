@@ -1,18 +1,21 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, FileText, Clock, Users } from 'lucide-react';
+import { Plus, FileText, Clock, Users, ArrowLeft, Home } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CreateAssignmentForm } from '@/components/CreateAssignmentForm';
 import { AssignmentSubmissions } from '@/components/AssignmentSubmissions';
-import { formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 export default function Assignments() {
   const [selectedAssignment, setSelectedAssignment] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: assignments, refetch } = useQuery({
     queryKey: ['lecturer-assignments'],
@@ -47,7 +50,7 @@ export default function Assignments() {
 
   const handleAssignmentCreated = () => {
     setIsCreateOpen(false);
-    refetch();
+    queryClient.invalidateQueries({ queryKey: ['lecturer-assignments'] });
   };
 
   if (selectedAssignment) {
@@ -67,8 +70,15 @@ export default function Assignments() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/lecturer/dashboard')}
+        >
+          <Home className="h-5 w-5" />
+        </Button>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold">Assignments</h1>
           <p className="text-muted-foreground">Manage assignments and CATs</p>
         </div>
@@ -112,15 +122,25 @@ export default function Assignments() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    Goes live: {formatDistanceToNow(new Date(assignment.go_live_date), { addSuffix: true })}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">
+                      Goes live: {format(new Date(assignment.go_live_date), 'PPp')}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      ({formatDistanceToNow(new Date(assignment.go_live_date), { addSuffix: true })})
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    Due: {formatDistanceToNow(new Date(assignment.due_date), { addSuffix: true })}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">
+                      Due: {format(new Date(assignment.due_date), 'PPp')}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      ({formatDistanceToNow(new Date(assignment.due_date), { addSuffix: true })})
+                    </span>
+                  </div>
                 </div>
                 {assignment.assignment_type === 'cat' && assignment.duration_minutes && (
                   <div className="flex items-center gap-2">
