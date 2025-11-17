@@ -27,7 +27,6 @@ export default function Assignments() {
             course_code
           )
         `)
-        .lte('go_live_date', new Date().toISOString())
         .order('due_date', { ascending: true });
 
       if (error) throw error;

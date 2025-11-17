@@ -149,13 +149,17 @@ export function CreateAssignmentForm({ onSuccess }: CreateAssignmentFormProps) {
         fileUrl = publicUrl;
       }
 
+      // Convert datetime-local to ISO string (which includes timezone)
+      const goLiveISO = new Date(formData.go_live_date).toISOString();
+      const dueISO = new Date(formData.due_date).toISOString();
+
       const { error } = await supabase.from('assignments').insert({
         title: formData.title.trim(),
         description: formData.description.trim(),
         class_id: formData.class_id,
         assignment_type: formData.assignment_type as 'assignment' | 'cat',
-        go_live_date: formData.go_live_date,
-        due_date: formData.due_date,
+        go_live_date: goLiveISO,
+        due_date: dueISO,
         duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : null,
         max_score: parseFloat(formData.max_score),
         file_url: fileUrl,
