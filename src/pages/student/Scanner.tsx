@@ -256,12 +256,14 @@ export default function Scanner() {
       });
 
       // Trigger pattern update and badge checking (don't await, let it run in background)
+      const { data: { session: authSession } } = await supabase.auth.getSession();
       supabase.functions.invoke('update-attendance-patterns', {
         body: {
           studentId: user.id,
           classId: session.class_id,
           sessionId: session.id,
         },
+        headers: authSession?.access_token ? { Authorization: `Bearer ${authSession.access_token}` } : undefined,
       }).catch(err => console.error('Pattern update failed:', err));
     } catch (error: any) {
       toast({
