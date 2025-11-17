@@ -857,6 +857,30 @@ export type Database = {
           },
         ]
       }
+      device_fingerprints: {
+        Row: {
+          fingerprint: string
+          first_seen: string | null
+          id: string
+          last_seen: string | null
+          student_id: string
+        }
+        Insert: {
+          fingerprint: string
+          first_seen?: string | null
+          id?: string
+          last_seen?: string | null
+          student_id: string
+        }
+        Update: {
+          fingerprint?: string
+          first_seen?: string | null
+          id?: string
+          last_seen?: string | null
+          student_id?: string
+        }
+        Relationships: []
+      }
       gamification_points: {
         Row: {
           id: string
@@ -1617,6 +1641,10 @@ export type Database = {
       is_group_member: {
         Args: { _group_id: string; _user_id: string }
         Returns: boolean
+      }
+      upsert_device_fingerprint: {
+        Args: { p_fingerprint: string; p_student_id: string }
+        Returns: undefined
       }
     }
     Enums: {
