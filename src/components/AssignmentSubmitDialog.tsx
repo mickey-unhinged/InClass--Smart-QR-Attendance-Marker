@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
 import { z } from 'zod';
+import { logActivity } from '@/lib/activityLogger';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const ALLOWED_FILE_TYPES = [
@@ -97,6 +98,15 @@ export function AssignmentSubmitDialog({ assignment, trigger }: AssignmentSubmit
       });
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity(
+        user.id,
+        'assignment_submitted',
+        `Submitted assignment "${assignment.title}"`,
+        assignment.id,
+        'assignment'
+      );
 
       toast.success('Assignment submitted successfully');
       setOpen(false);

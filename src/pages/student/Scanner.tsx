@@ -12,6 +12,7 @@ import { getDeviceFingerprint, getStableDeviceFingerprint } from '@/lib/security
 import { calculateDistance } from '@/lib/locationUtils';
 import { addPendingAttendance } from '@/lib/offlineStorage';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { logActivity } from '@/lib/activityLogger';
 
 export default function Scanner() {
   const { user, signOut } = useAuth();
@@ -137,6 +138,15 @@ export default function Scanner() {
           setScanning(false);
           return;
         }
+
+        // Log enrollment activity
+        await logActivity(
+          user.id,
+          'class_enrolled',
+          `Enrolled in ${session.classes.course_code} - ${session.classes.course_name}`,
+          session.class_id,
+          'class'
+        );
 
         toast({
           title: 'Successfully Enrolled!',
@@ -285,6 +295,15 @@ export default function Scanner() {
       if (deviceError) {
         console.error('Failed to record device fingerprint:', deviceError);
       }
+
+      // Log attendance activity
+      await logActivity(
+        user.id,
+        'attendance_marked',
+        `Marked attendance for ${session.classes.course_code} - ${session.classes.course_name}`,
+        session.id,
+        'session'
+      );
 
       setSessionInfo(session);
       setSuccess(true);

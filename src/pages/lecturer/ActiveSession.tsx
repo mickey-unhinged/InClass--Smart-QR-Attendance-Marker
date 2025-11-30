@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateQRCode } from '@/lib/qrcode';
 import { preventScreenshot } from '@/lib/securityUtils';
 import { requestNotificationPermission, notifySessionActive } from '@/lib/notifications';
+import { logActivity } from '@/lib/activityLogger';
 import { X, Users, Clock, CheckCircle2, LogOut, Shield, MapPin, Settings } from 'lucide-react';
 
 interface Session {
@@ -203,7 +204,7 @@ export default function ActiveSession() {
   };
 
   const endSession = async () => {
-    if (!sessionId) return;
+    if (!sessionId || !user) return;
 
     try {
       const { error } = await supabase
@@ -212,6 +213,15 @@ export default function ActiveSession() {
         .eq('id', sessionId);
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity(
+        user.id,
+        'session_ended',
+        `Ended attendance session for ${session?.classes.course_code} - ${session?.classes.course_name} with ${attendees.length} attendees`,
+        sessionId,
+        'session'
+      );
 
       toast({
         title: 'Session Ended',

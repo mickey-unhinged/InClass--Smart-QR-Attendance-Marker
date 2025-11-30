@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
 import { z } from 'zod';
+import { logActivity } from '@/lib/activityLogger';
 
 const assignmentSchema = z.object({
   title: z.string().trim().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -153,7 +154,7 @@ export function CreateAssignmentForm({ onSuccess }: CreateAssignmentFormProps) {
       const goLiveISO = new Date(formData.go_live_date).toISOString();
       const dueISO = new Date(formData.due_date).toISOString();
 
-      const { error } = await supabase.from('assignments').insert({
+      const { data: insertedAssignment, error } = await supabase.from('assignments').insert({
         title: formData.title.trim(),
         description: formData.description.trim(),
         class_id: formData.class_id,
@@ -164,9 +165,22 @@ export function CreateAssignmentForm({ onSuccess }: CreateAssignmentFormProps) {
         max_score: parseFloat(formData.max_score),
         file_url: fileUrl,
         created_by: user.id,
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // Get class info for activity log
+      const selectedClass = classes?.find(c => c.id === formData.class_id);
+      const typeLabel = formData.assignment_type === 'cat' ? 'CAT' : 'Assignment';
+
+      // Log activity
+      await logActivity(
+        user.id,
+        'assignment_created',
+        `Created ${typeLabel} "${formData.title}" for ${selectedClass?.course_code || 'class'}`,
+        insertedAssignment?.id,
+        'assignment'
+      );
 
       toast.success('Assignment created successfully');
       onSuccess();

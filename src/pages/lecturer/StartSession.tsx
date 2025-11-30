@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { generateSessionCode, generateQRCode } from '@/lib/qrcode';
+import { logActivity } from '@/lib/activityLogger';
 import { QrCode, Clock, Users, LogOut } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -115,6 +116,15 @@ export default function StartSession() {
         .single();
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity(
+        user.id,
+        'session_started',
+        `Started attendance session for ${classData.course_code} - ${classData.course_name}`,
+        data.id,
+        'session'
+      );
 
       toast({
         title: 'Session Started',
