@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { EmailVerificationBanner } from '@/components/EmailVerificationBanner';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { QuickActions } from '@/components/QuickActions';
-import { AIAssistant } from '@/components/AIAssistant';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -470,7 +470,6 @@ export default function LecturerDashboard() {
           </Card>
         </div>
       </main>
-      <AIAssistant />
     </div>
   );
 }
