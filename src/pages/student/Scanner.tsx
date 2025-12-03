@@ -8,8 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { QRScanner } from '@/components/QRScanner';
 import { QrCode, CheckCircle2, LogOut, Camera } from 'lucide-react';
 import { validateSessionCode } from '@/lib/qrcode';
-import { getDeviceFingerprint, getStableDeviceFingerprint } from '@/lib/securityUtils';
-import { calculateDistance } from '@/lib/locationUtils';
+import { getStableDeviceFingerprint } from '@/lib/securityUtils';
+import { getCurrentLocation, calculateDistance } from '@/lib/locationUtils';
 import { addPendingAttendance } from '@/lib/offlineStorage';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { logActivity } from '@/lib/activityLogger';
@@ -191,12 +191,9 @@ export default function Scanner() {
       let locationData: any = {};
       if (session.location_required && session.classroom_latitude && session.classroom_longitude) {
         try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-          });
-
-          const studentLat = position.coords.latitude;
-          const studentLng = position.coords.longitude;
+          const userLocation = await getCurrentLocation();
+          const studentLat = userLocation.latitude;
+          const studentLng = userLocation.longitude;
           const distance = calculateDistance(
             { latitude: studentLat, longitude: studentLng },
             { 
