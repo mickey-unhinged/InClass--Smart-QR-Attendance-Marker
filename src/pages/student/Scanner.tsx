@@ -191,7 +191,27 @@ export default function Scanner() {
       let locationData: any = {};
       if (session.location_required && session.classroom_latitude && session.classroom_longitude) {
         try {
-          const userLocation = await getCurrentLocation();
+          // Try to get high-accuracy location with multiple attempts
+          let userLocation;
+          let attempts = 0;
+          const maxAttempts = 2;
+          
+          while (attempts < maxAttempts) {
+            try {
+              userLocation = await getCurrentLocation();
+              break;
+            } catch (locError) {
+              attempts++;
+              if (attempts >= maxAttempts) throw locError;
+              // Wait briefly before retry
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          }
+          
+          if (!userLocation) {
+            throw new Error('Could not get location');
+          }
+          
           const studentLat = userLocation.latitude;
           const studentLng = userLocation.longitude;
           const distance = calculateDistance(
@@ -202,10 +222,17 @@ export default function Scanner() {
             }
           );
 
-          if (distance > session.geofence_radius_meters) {
+          console.log('Location verification:', {
+            student: { lat: studentLat, lng: studentLng },
+            classroom: { lat: session.classroom_latitude, lng: session.classroom_longitude },
+            distance: Math.round(distance),
+            radius: session.geofence_radius_meters
+          });
+
+          if (distance > (session.geofence_radius_meters || 100)) {
             toast({
               title: 'Location Verification Failed',
-              description: `You must be within ${session.geofence_radius_meters}m of the classroom. You are ${Math.round(distance)}m away.`,
+              description: `You are ${Math.round(distance)}m away from the registered classroom location. Required: within ${session.geofence_radius_meters || 100}m. Please ensure your GPS is accurate and try again, or ask your lecturer to adjust the geofence settings.`,
               variant: 'destructive',
             });
             setScanning(false);
@@ -218,10 +245,11 @@ export default function Scanner() {
             distance_from_classroom: distance,
             location_verified: true,
           };
-        } catch (error) {
+        } catch (error: any) {
+          console.error('Location error:', error);
           toast({
             title: 'Location Access Required',
-            description: 'Please enable location services to mark attendance',
+            description: error.message || 'Please enable location services and ensure GPS is accurate. Try moving to an open area for better signal.',
             variant: 'destructive',
           });
           setScanning(false);

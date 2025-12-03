@@ -12,19 +12,39 @@ export const getCurrentLocation = (): Promise<LocationCoordinates> => {
       return;
     }
 
+    // First try with high accuracy (GPS)
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log('GPS accuracy:', position.coords.accuracy, 'meters');
         resolve({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
       },
       (error) => {
-        reject(error);
+        // If high accuracy fails, try with lower accuracy as fallback
+        console.warn('High accuracy location failed, trying fallback:', error.message);
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            console.log('Fallback GPS accuracy:', position.coords.accuracy, 'meters');
+            resolve({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            });
+          },
+          (fallbackError) => {
+            reject(fallbackError);
+          },
+          {
+            enableHighAccuracy: false,
+            timeout: 15000,
+            maximumAge: 30000,
+          }
+        );
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 0,
       }
     );
