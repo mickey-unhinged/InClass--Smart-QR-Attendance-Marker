@@ -59,8 +59,10 @@ export default function StartSession() {
     const template = templates.find(t => t.id === templateId);
     if (template) {
       setDuration(template.duration_minutes.toString());
-      setLocationRequired(template.location_required);
-      setGeofenceRadius(template.grace_period_minutes || 100);
+      setLocationRequired(template.location_required || false);
+      // Use settings.geofence_radius_meters if available, otherwise default to 100
+      const templateRadius = template.settings?.geofence_radius_meters;
+      setGeofenceRadius(typeof templateRadius === 'number' ? templateRadius : 100);
     }
   };
 
@@ -91,6 +93,16 @@ export default function StartSession() {
 
   const handleStartSession = async () => {
     if (!classData || !user) return;
+
+    // Validate location if required
+    if (locationRequired && (!latitude || !longitude)) {
+      toast({
+        title: "Location Required",
+        description: "Please set the classroom location before starting the session.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
       const sessionCode = generateSessionCode();

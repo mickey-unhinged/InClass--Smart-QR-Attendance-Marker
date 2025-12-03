@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
-  Activity, 
+  Activity,
   CheckCircle, 
   Award, 
   BookOpen, 
@@ -45,9 +46,18 @@ const getActivityIcon = (type: string) => {
 };
 
 export function ActivityFeed({ limit = 10, showViewAll = true }: { limit?: number; showViewAll?: boolean }) {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
+  const navigate = useNavigate();
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleViewAll = () => {
+    if (userRole === 'lecturer') {
+      navigate('/lecturer/activity');
+    } else if (userRole === 'student') {
+      navigate('/student/activity');
+    }
+  };
 
   useEffect(() => {
     fetchActivities();
@@ -155,7 +165,7 @@ export function ActivityFeed({ limit = 10, showViewAll = true }: { limit?: numbe
         </ScrollArea>
         
         {showViewAll && (
-          <Button variant="ghost" className="w-full mt-4" size="sm">
+          <Button variant="ghost" className="w-full mt-4" size="sm" onClick={handleViewAll}>
             View All Activity
             <ExternalLink className="h-3 w-3 ml-2" />
           </Button>
